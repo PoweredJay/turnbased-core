@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum DamageType { Bludgeoning, Piercing, Slashing, Fire, Water, Air, Light, Dark }
 
@@ -13,5 +14,8 @@ public class Skill : ScriptableObject
     public int cost;
     public int tier;
     public bool Heal;
+    public bool All;
     public DamageType type;
+
+    public Sprite typeSprite;
 }

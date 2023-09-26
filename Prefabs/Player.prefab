@@ -107,9 +107,10 @@ MonoBehaviour:
   curHP: 30
   maxMP: 20
   curMP: 13
-  skill1: {fileID: 11400000, guid: 0476a85e3bbacca49aede1378bb4e89d, type: 2}
-  skill2: {fileID: 0}
-  skill3: {fileID: 0}
-  skill4: {fileID: 0}
-  skill5: {fileID: 0}
-  skill6: {fileID: 0}
+  Skills:
+  - {fileID: 11400000, guid: 0476a85e3bbacca49aede1378bb4e89d, type: 2}
+  - {fileID: 11400000, guid: c0b3dfc95ad5ce945a3b85fe0879a57c, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}

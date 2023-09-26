@@ -40,6 +40,12 @@ public class BattleSystem : MonoBehaviour
     public BattleHUD playerHUD4;
     public BattleHUD playerHUD5;
 
+    public SkillHUD skillHUD1;
+    public SkillHUD skillHUD2;
+    public SkillHUD skillHUD3;
+    public SkillHUD skillHUD4;
+    public SkillHUD skillHUD5;
+    public SkillHUD skillHUD6;
 
     public Text dialogueText;
 
@@ -121,6 +127,9 @@ public class BattleSystem : MonoBehaviour
         ActionMenu.SetActive(false);
         SkillMenu.SetActive(true);
         EventSystem.current.SetSelectedGameObject(SkillMenu.transform.GetChild(0).gameObject);
+        skillHUD1.SetSkillHUD(playerUnit, skillHUD1.buttonID);
+        skillHUD2.skillName.text = skillHUD2.whatAmI(playerUnit, skillHUD2.buttonID);
+        
     }
 
     public void OnSkillHover()

@@ -16,12 +16,7 @@ public class Unit : MonoBehaviour
     public int maxMP;
     public int curMP;
 
-    public Skill skill1;
-    public Skill skill2;
-    public Skill skill3;
-    public Skill skill4;
-    public Skill skill5;
-    public Skill skill6;
+    public Skill[] Skills = new Skill[6];
 
     public bool TakeDamage(int dmg)
     {

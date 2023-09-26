@@ -18,4 +18,6 @@ MonoBehaviour:
   cost: 7
   tier: 1
   Heal: 0
+  All: 1
   type: 6
+  typeSprite: {fileID: 21300000, guid: 1355d1aec1b6e7f438c81864ba9007b6, type: 3}
