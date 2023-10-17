@@ -103,10 +103,11 @@ MonoBehaviour:
   magStat: 5
   defStat: 7
   spdStat: 5
-  maxHP: 30
-  curHP: 30
-  maxMP: 20
-  curMP: 13
+  wepAtk: 26
+  maxHP: 81
+  curHP: 81
+  maxMP: 53
+  curMP: 50
   Skills:
   - {fileID: 11400000, guid: 0476a85e3bbacca49aede1378bb4e89d, type: 2}
   - {fileID: 11400000, guid: c0b3dfc95ad5ce945a3b85fe0879a57c, type: 2}

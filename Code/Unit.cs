@@ -10,6 +10,7 @@ public class Unit : MonoBehaviour
     public int magStat;
     public int defStat;
     public int spdStat;
+    public int wepAtk;
 
     public int maxHP;
     public int curHP;
@@ -25,10 +26,6 @@ public class Unit : MonoBehaviour
         if (curHP <= 0)
         {
             return true;
-        } else if (curHP > maxHP)
-        { 
-            curHP = maxHP;
-            return false;
         } else
         {
             return false;

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class SkillHUD : MonoBehaviour
+public class SkillHUD : MonoBehaviour, ISelectHandler
 {
     public Text skillName;
     public Text descriptionText;
@@ -23,5 +23,9 @@ public class SkillHUD : MonoBehaviour
         costText.text = "COST: " + unit.Skills[skillNum].cost.ToString() + " MP";
         SpriteRenderer spriteRend = typeSprite.GetComponent<SpriteRenderer>();
         spriteRend.sprite = unit.Skills[skillNum].typeSprite;
+    }
+    public void OnSelect(BaseEventData eventData)
+    {
+        SetSkillHUD(BattleSystem.curPlayerUnit, buttonID);
     }
 }
