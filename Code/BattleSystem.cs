@@ -61,6 +61,8 @@ public class BattleSystem : MonoBehaviour
     GameObject lastSelect;
     public static Unit curPlayerUnit;
     // Start is called before the first frame update
+    public List<Unit> AllyUnitList;
+    public List<Unit> EnemyUnitList;
     void Start()
     {
         state = BattleState.START;
@@ -94,7 +96,7 @@ public class BattleSystem : MonoBehaviour
         dialogueText.text = "You find yourself face to face with " + enemyUnit.unitName;
 
         playerHUD1.SetHUD(curPlayerUnit);
-        ActionMenu.SetActive(true);
+        ActionMenu.SetActive(false);
         SkillMenu.SetActive(false);
 
         yield return new WaitForSeconds(2.5f);
@@ -105,6 +107,8 @@ public class BattleSystem : MonoBehaviour
 
     void playerTurn()
     {
+        ActionMenu.SetActive(true);
+        SkillMenu.SetActive(false);
         dialogueText.text = "What would you like to do?";
     }
 
@@ -117,19 +121,6 @@ public class BattleSystem : MonoBehaviour
         
         StartCoroutine(PlayerAttack());
     }
-
-    public int DamageCalc(int atkStat, int defStat, int thingPow, float dmgMod)
-    {
-        int finalDam = (int)(thingPow * ((Mathf.Pow((float)atkStat/defStat, 2) + (float)atkStat/defStat)/4));
-        return finalDam;
-    }
-
-    public int HealCalc(int magStat, int healPow)
-    {
-        int finalHeal = (int)(healPow - ((float)healPow/magStat));
-        return finalHeal;
-    }
-
     public void OnSkillButton()
     {
         ActionMenu.SetActive(false);
@@ -148,6 +139,10 @@ public class BattleSystem : MonoBehaviour
         }
         GameObject skillButton = EventSystem.current.currentSelectedGameObject;
         SkillHUD skillCaller = skillButton.gameObject.GetComponent<SkillHUD>();
+        if(curPlayerUnit.curMP < curPlayerUnit.Skills[skillCaller.buttonID].cost)
+        {
+            dialogueText.text = "Not enough MP to use " + curPlayerUnit.Skills[skillCaller.buttonID].skillName + ".";
+        }
         StartCoroutine(SkillUsage(skillCaller.buttonID));
     }
 
@@ -168,11 +163,20 @@ public class BattleSystem : MonoBehaviour
             dialogueText.text = "You were defeated.";
         }
     }
+    public static double damageModCalc(Unit atkr, Unit defr)
+    {
+        return (((1.0 + 0.2*atkr.ATKStatus) + (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)atkr.weapon.damageType)));
+    }
+    public static double damageModCalc(Unit atkr, Unit defr, Skill skill)
+    {
+        return (((1.0 + 0.2*atkr.ATKStatus) + (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)skill.type)));
+    }
+    
 
     IEnumerator PlayerAttack()
     {
-        int incDmg = DamageCalc(curPlayerUnit.atkStat, enemyUnit.defStat, curPlayerUnit.wepAtk, 1);
-        bool isDead = enemyUnit.TakeDamage(incDmg);
+        int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, enemyUnit.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, enemyUnit));
+        bool isDead = enemyUnit.TakeDamage((int)(incDmg));
 
         dialogueText.text = "You attack, dealing " + incDmg + " damage!";
 
@@ -193,26 +197,17 @@ public class BattleSystem : MonoBehaviour
     {
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
-        if(curPlayerUnit.Skills[skillNum].Heal == true)
+        Skill curSkill = curPlayerUnit.Skills[skillNum];
+        if(curSkill.All)
         {
-            int incHeal = HealCalc(curPlayerUnit.magStat, curPlayerUnit.Skills[skillNum].power);
-            curPlayerUnit.HealDamage(incHeal);
-            dialogueText.text = "You cast " + curPlayerUnit.Skills[skillNum].skillName + " , healing " + incHeal + " HP.";
-
-            yield return new WaitForSeconds(2f);
-
-            state = BattleState.ENEMYTURN;
-            StartCoroutine(EnemyTurn());
-        } else 
+            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, playerHUD1);
+        } else
         {
-            int incDmg = DamageCalc(curPlayerUnit.magStat, enemyUnit.defStat, curPlayerUnit.Skills[skillNum].power, 1);
-            bool isDead = enemyUnit.TakeDamage(incDmg);
+            curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
+        }
+        yield return new WaitForSeconds(2f);
 
-            dialogueText.text = "You cast " + curPlayerUnit.Skills[skillNum].skillName + " , dealing " + incDmg + " damage!";
-
-            yield return new WaitForSeconds(2f);
-
-            if (isDead)
+            if (enemyUnit.curHP == 0)
             {
                 state = BattleState.WON;
                 EndBattle();
@@ -221,16 +216,16 @@ public class BattleSystem : MonoBehaviour
                 state = BattleState.ENEMYTURN;
                 StartCoroutine(EnemyTurn());
             }
-        }
+        
         //
     }
 
     IEnumerator EnemyTurn()
     {
-        int incDmg = DamageCalc(enemyUnit.atkStat, curPlayerUnit.defStat, enemyUnit.wepAtk, 1);
+        int incDmg = (int)(Unit.DamageCalc(enemyUnit.atkStat, curPlayerUnit.defStat, enemyUnit.weapon.power) * damageModCalc(enemyUnit, curPlayerUnit));
         dialogueText.text = enemyUnit.unitName + " attacks, dealing " + incDmg + " damage.";
 
-        bool isDead = curPlayerUnit.TakeDamage(incDmg);
+        bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
 
         playerHUD1.SetHP(curPlayerUnit.curHP);
 

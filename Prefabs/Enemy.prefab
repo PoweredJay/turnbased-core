@@ -103,11 +103,27 @@ MonoBehaviour:
   magStat: 1
   defStat: 2
   spdStat: 1
-  wepAtk: 30
   maxHP: 130
   curHP: 130
   maxMP: 50
   curMP: 50
+  leader: 0
+  down: 0
+  flow: 0
+  weapon: {fileID: 11400000, guid: 7b8fc9b4623fe4d46b9228d9254f163d, type: 2}
+  armor: {fileID: 0}
+  charm: {fileID: 0}
+  bludgeoningAffinity: 0
+  piercingAffinity: 0
+  slashingAffinity: 0
+  fireAffinity: 0
+  waterAffinity: 0
+  airAffinity: 0
+  lightAffinity: 0
+  darkAffinity: 0
+  ATKStatus: 0
+  DEFStatus: 0
+  SPDStatus: 0
   Skills:
   - {fileID: 0}
   - {fileID: 0}
@@ -115,3 +131,4 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  Ailment: {fileID: 0}
