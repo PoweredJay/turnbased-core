@@ -60,7 +60,6 @@ public class BattleSystem : MonoBehaviour
     public BattleState state;
     GameObject lastSelect;
     public static Unit curPlayerUnit;
-    // Start is called before the first frame update
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;
     void Start()
@@ -68,8 +67,8 @@ public class BattleSystem : MonoBehaviour
         state = BattleState.START;
         Cursor.visible = false;
         battleMusic = GetComponent<AudioSource>();
-        battleMusic.loop = true;
         battleMusic.Play();
+        battleMusic.loop = true;
         StartCoroutine(SetupBattle());
         EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
         lastSelect = new GameObject();
@@ -77,6 +76,7 @@ public class BattleSystem : MonoBehaviour
 
     void Update()
     {
+        Cursor.visible = false;
         if (EventSystem.current.currentSelectedGameObject == null)
         {
             EventSystem.current.SetSelectedGameObject(lastSelect);
@@ -109,6 +109,7 @@ public class BattleSystem : MonoBehaviour
     {
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
         dialogueText.text = "What would you like to do?";
     }
 
@@ -165,11 +166,11 @@ public class BattleSystem : MonoBehaviour
     }
     public static double damageModCalc(Unit atkr, Unit defr)
     {
-        return (((1.0 + 0.2*atkr.ATKStatus) + (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)atkr.weapon.damageType)));
+        return (((1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)atkr.weapon.damageType)));
     }
     public static double damageModCalc(Unit atkr, Unit defr, Skill skill)
     {
-        return (((1.0 + 0.2*atkr.ATKStatus) + (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)skill.type)));
+        return (((1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)skill.type)));
     }
     
 
@@ -200,14 +201,14 @@ public class BattleSystem : MonoBehaviour
         Skill curSkill = curPlayerUnit.Skills[skillNum];
         if(curSkill.All)
         {
-            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, playerHUD1);
+            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText);
         } else
         {
             curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
         }
         yield return new WaitForSeconds(2f);
-
-            if (enemyUnit.curHP == 0)
+        //Update HUDs
+            if (enemyUnit.curHP <= 0)
             {
                 state = BattleState.WON;
                 EndBattle();
@@ -222,6 +223,7 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator EnemyTurn()
     {
+        EventSystem.current.SetSelectedGameObject(null);
         int incDmg = (int)(Unit.DamageCalc(enemyUnit.atkStat, curPlayerUnit.defStat, enemyUnit.weapon.power) * damageModCalc(enemyUnit, curPlayerUnit));
         dialogueText.text = enemyUnit.unitName + " attacks, dealing " + incDmg + " damage.";
 
@@ -240,6 +242,7 @@ public class BattleSystem : MonoBehaviour
             state = BattleState.PLAYERTURN1;
             playerTurn();
         }
+
 
     }
 

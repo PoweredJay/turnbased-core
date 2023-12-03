@@ -19,6 +19,7 @@ public class Unit : MonoBehaviour
     public bool leader;
     public bool down;
     public bool flow;
+    public int EXP;
     public Equip weapon;
     public Equip armor;
     public Equip charm;
@@ -154,5 +155,9 @@ public class Unit : MonoBehaviour
         }
         return -1;
         
+    }
+    public override string ToString()
+    {
+        return unitName;
     }
 }

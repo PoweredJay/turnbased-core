@@ -73,8 +73,8 @@ public class Skill : ScriptableObject
             //Heal
             case 1:
                 int incHeal = Skill.HealCalc(atkr.magStat, power);
-                atkr.HealDamage(incHeal);
-                dialogueText.text = "You cast " + skillName + " , healing " + incHeal + " HP.";
+                defr.HealDamage(incHeal);
+                dialogueText.text = "You cast " + skillName + " , healing " + defr.ToString() + " for " + incHeal + " HP.";
                 atkr.MPCost(cost);
                 playerHUD.SetMP(atkr.curMP);
                 break;
@@ -94,40 +94,82 @@ public class Skill : ScriptableObject
                 break;
         }
     }
-    public void SkillUseAll(int ID, Unit atkr, List<Unit> allyList, List<Unit> enemyList, Text dialogueText, BattleHUD playerHUD)
+    public void SkillUseAll(int ID, Unit atkr, List<Unit> allyList, List<Unit> enemyList, Text dialogueText)
     {
-        // switch(ID)
-        // {   
-        //     //Attack
-        //     case 0:
-        //         int incDmg = (int)(Skill.DamageCalc(atkr.magStat, defr.defStat, power) * BattleSystem.damageModCalc(atkr, defr, this));
-        //         bool isDead = defr.TakeDamage((incDmg));
-        //         dialogueText.text = "You cast " + skillName + " , dealing " + incDmg + " damage!";
-        //         atkr.MPCost(cost);
-        //         playerHUD.SetMP(atkr.curMP);
-        //         break;
-        //     //Heal
-        //     case 1:
-        //         int incHeal = Skill.HealCalc(atkr.magStat, power);
-        //         atkr.HealDamage(incHeal);
-        //         dialogueText.text = "You cast " + skillName + " , healing " + incHeal + " HP.";
-        //         atkr.MPCost(cost);
-        //         playerHUD.SetMP(atkr.curMP);
-        //         break;
-        //     //Buff
-        //     case 2:
-        //         atkr.ModChange(ATKMod, DEFMod, SPDMod);
-        //         break;
-        //     //Debuff
-        //     case 3:
-        //         defr.ModChange(ATKMod, DEFMod, SPDMod);
-        //         break;
-        //     //Ailment
-        //     case 4:
-        //         break;
-        //     //Cure
-        //     case 5:
-        //         break;
-        // }
+        switch(ID)
+        {   
+            //Attack
+            case 0:
+                foreach(Unit recvr in enemyList)
+                {
+                    int incDmg = (int)(Skill.DamageCalc(atkr.magStat, recvr.defStat, power) * BattleSystem.damageModCalc(atkr, recvr, this));
+                    bool isDead = recvr.TakeDamage((incDmg));
+                }
+                dialogueText.text = "You cast " + skillName + "!";
+                atkr.MPCost(cost);
+                //MP Set
+                break;
+            //Heal
+            case 1:
+                int incHeal = Skill.HealCalc(atkr.magStat, power);
+                foreach(Unit recvr in allyList)
+                {
+                    recvr.HealDamage(incHeal);
+                }
+                dialogueText.text = "You cast " + skillName + " , healing " + incHeal + " HP to all allies.";
+                atkr.MPCost(cost);
+                //MP Set
+                break;
+            //Buff
+            case 2:
+                foreach(Unit recvr in allyList)
+                {
+                    recvr.ModChange(ATKMod, DEFMod, SPDMod);
+                }
+                string outputB = "You cast " + skillName + "!";
+                if(ATKMod != 0)
+                {
+                    outputB += "\nParty ATK increased by " + ATKMod + "stage.";
+                }
+                if(DEFMod != 0)
+                {
+                    outputB += "\nParty DEF increased by " + DEFMod + "stage.";
+                }
+                if(SPDMod != 0)
+                {
+                    outputB += "\nParty SPD increased by " + SPDMod + "stage.";                    
+                }
+                dialogueText.text = outputB;
+                atkr.MPCost(cost);
+                break;
+            //Debuff
+            case 3:
+                foreach(Unit recvr in enemyList)
+                {
+                    recvr.ModChange(ATKMod, DEFMod, SPDMod);
+                }
+                string outputD = "You cast " + skillName + "!";
+                if(ATKMod != 0)
+                {
+                    outputD += "\nEnemy ATK decreased by " + ATKMod + "stage.";
+                }
+                if(DEFMod != 0)
+                {
+                    outputD += "\nEnemy DEF decreased by " + DEFMod + "stage.";
+                }
+                if(SPDMod != 0)
+                {
+                    outputD += "\nEnemy SPD decreased by " + SPDMod + "stage.";                    
+                }
+                dialogueText.text = outputD;
+                atkr.MPCost(cost);
+                break;
+            //Ailment
+            case 4:
+                break;
+            //Cure
+            case 5:
+                break;
+        }
     }
 }
