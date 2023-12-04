@@ -18,11 +18,19 @@ public class SkillHUD : MonoBehaviour, ISelectHandler
     }
     public void SetSkillHUD(Unit unit, int skillNum)
     {
-        skillName.text = unit.Skills[skillNum].skillName;
-        descriptionText.text = unit.Skills[skillNum].desc;
-        costText.text = "COST: " + unit.Skills[skillNum].cost.ToString() + " MP";
-        SpriteRenderer spriteRend = typeSprite.GetComponent<SpriteRenderer>();
-        spriteRend.sprite = unit.Skills[skillNum].typeSprite;
+        Skill curSkill = unit.Skills[skillNum];
+        if(skillNum.passive)
+        {
+            return;
+        } else
+        {
+            skillName.text = curSkill.skillName;
+            descriptionText.text = curSkill.desc;
+            costText.text = "COST: " + curSkill.cost.ToString() + " MP";
+            SpriteRenderer spriteRend = typeSprite.GetComponent<SpriteRenderer>();
+            spriteRend.sprite = curSkill.typeSprite;
+        }
+
     }
     public void OnSelect(BaseEventData eventData)
     {

@@ -24,8 +24,7 @@ public enum SkillType
     Buff = 2,
     Debuff = 3,
     Ailment = 4,
-    Cure = 5,
-
+    Cure = 5
 }
 
 [CreateAssetMenu(fileName = "New Skill", menuName = "Skill")]
@@ -43,6 +42,7 @@ public class Skill : ScriptableObject
     
     public bool Heal;
     public bool All;
+    public bool passive;
     public Sprite typeSprite;
     public DamageType type;
 

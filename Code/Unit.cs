@@ -2,7 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+public enum ActionType 
+{
+    Attack = 0,
+    Skill = 1,
+    Leader = 2,
+    Team = 3,
+    Guard = 4,
+    Move = 5,
+    Item = 6,
+    Flee = 7
+}
 public class Unit : MonoBehaviour
 {
     public string unitName;
@@ -17,8 +27,10 @@ public class Unit : MonoBehaviour
     public int maxMP;
     public int curMP;
     public bool leader;
-    public bool down;
-    public bool flow;
+    public bool down = false;
+    public bool flow = false;
+    public bool guard = false;
+
     public int EXP;
     public Equip weapon;
     public Equip armor;
@@ -56,8 +68,23 @@ public class Unit : MonoBehaviour
         For example, if DEFStatus = -2, then the DEF of that unit is reduced by 40% (moderately reduced).
     */
     public Skill[] Skills = new Skill[9];
+    public List<Skill> SkillListActive;
+    public List<Skill> SkillListPassive;
     public Status Ailment;
-
+    public ActionType action;
+    void Start()
+    {
+        foreach(Skill sk in Skills)
+        {
+            if(sk.passive)
+            {
+                SkillListPassive.Add(sk);
+            } else
+            {
+                SkillListActive.Add(sk);
+            }
+        }
+    }
     public static int DamageCalc(int aStat, int dStat, int thingPow)
     {
         int finalDam = (int)(thingPow * ((Mathf.Pow((float)aStat/dStat, 0.5f) + (float)aStat/dStat)/4));
@@ -81,6 +108,7 @@ public class Unit : MonoBehaviour
         {
             return false;
         }
+        guard = false;
     }
 
     public void HealDamage(int heal)

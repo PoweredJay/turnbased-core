@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,12 +28,13 @@ public class BattleSystem : MonoBehaviour
     public Transform grid32;
     public Transform grid33;
     /*
-    The grid transforms are nine distinct points where you can place units in a 3x3 square
+    The grid transforms are nine distinct points where you can place units in a 3x3 square, with 
+    coordinates corresponding to the grid below.
 
     11 12 13
     21 22 23
     31 32 33
-    Coordinates cooresponding to this grid ^
+    Will be implemented in the future.
     */
 
     public BattleHUD playerHUD1;
@@ -47,6 +49,8 @@ public class BattleSystem : MonoBehaviour
     public SkillHUD skillHUD4;
     public SkillHUD skillHUD5;
     public SkillHUD skillHUD6;
+    public SkillHUD skillHUD7;
+    public SkillHUD skillHUD8;
 
     public Text dialogueText;
 
@@ -59,9 +63,11 @@ public class BattleSystem : MonoBehaviour
     Unit enemyUnit;
     public BattleState state;
     GameObject lastSelect;
-    public static Unit curPlayerUnit;
+    public Unit curPlayerUnit;
+    public Unit selectedEnemyUnit;
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;
+    public List<Unit> UnitList;
     void Start()
     {
         state = BattleState.START;
@@ -98,6 +104,12 @@ public class BattleSystem : MonoBehaviour
         playerHUD1.SetHUD(curPlayerUnit);
         ActionMenu.SetActive(false);
         SkillMenu.SetActive(false);
+        AllyUnitList.Add(curPlayerUnit);
+        EnemyUnitList.Add(enemyUnit);
+        UnitList.AddRange(AllyUnitList);
+        UnitList.AddRange(EnemyUnitList);
+        List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
+
 
         yield return new WaitForSeconds(2.5f);
 
@@ -143,8 +155,11 @@ public class BattleSystem : MonoBehaviour
         if(curPlayerUnit.curMP < curPlayerUnit.Skills[skillCaller.buttonID].cost)
         {
             dialogueText.text = "Not enough MP to use " + curPlayerUnit.Skills[skillCaller.buttonID].skillName + ".";
+        } else
+        {
+            StartCoroutine(SkillUsage(skillCaller.buttonID));
         }
-        StartCoroutine(SkillUsage(skillCaller.buttonID));
+        
     }
 
     public void OnBackButton()
@@ -152,6 +167,17 @@ public class BattleSystem : MonoBehaviour
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
+    }
+    public void OnGuardButton()
+    {
+        if(state != BattleState.PLAYERTURN1)
+        {
+            return;
+        }
+        curPlayerUnit.guard = true;
+        dialogueText.text = curPlayerUnit.unitName + " is guarding for the next attack.";
+        state = BattleState.ENEMYTURN;
+        StartCoroutine(EnemyTurn());
     }
 
     void EndBattle()
@@ -166,11 +192,45 @@ public class BattleSystem : MonoBehaviour
     }
     public static double damageModCalc(Unit atkr, Unit defr)
     {
-        return (((1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)atkr.weapon.damageType)));
+        double damageMod = (1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus);
+        int defrAff = defr.GetAffinity((int)atkr.weapon.damageType);
+        if(atkr.flow)
+        {
+            damageMod *= 1.1;
+        }
+        if(defr.guard)
+        {
+            damageMod *= 0.6 * Math.Min(1.0 - 0.5*defrAff, 1.0);
+        } else
+        {
+            damageMod *= (1.0 - 0.5*defrAff);
+            if(defrAff == -1)
+            {
+                atkr.flow = true;
+            }
+        }
+        return damageMod;
     }
     public static double damageModCalc(Unit atkr, Unit defr, Skill skill)
     {
-        return (((1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus)) * (1.0 - 0.5*defr.GetAffinity((int)skill.type)));
+        double damageMod = (1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus);
+        int defrAff = defr.GetAffinity((int)skill.type);
+        if(atkr.flow)
+        {
+            damageMod *= 1.1;
+        }
+        if(defr.guard)
+        {
+            damageMod *= 0.6 * Math.Min(1.0 - 0.5*defrAff, 1.0);
+        } else
+        {
+            damageMod *= (1.0 - 0.5*defrAff);
+            if(defrAff == -1)
+            {
+                atkr.flow = true;
+            }
+        }
+        return damageMod;
     }
     
 
@@ -242,8 +302,6 @@ public class BattleSystem : MonoBehaviour
             state = BattleState.PLAYERTURN1;
             playerTurn();
         }
-
-
     }
 
 }
