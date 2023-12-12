@@ -11,8 +11,10 @@ public class Equip : ScriptableObject
     public string equipName;
     public string desc;
     public int power;
+    public bool twoHand;
     public Sprite equipSprite;
     public Skill skillGranted;
     public EquipType equipType;
     public DamageType damageType;
+    public DamageType damageType2;
 }

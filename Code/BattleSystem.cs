@@ -63,7 +63,7 @@ public class BattleSystem : MonoBehaviour
     Unit enemyUnit;
     public BattleState state;
     GameObject lastSelect;
-    public Unit curPlayerUnit;
+    public static Unit curPlayerUnit;
     public Unit selectedEnemyUnit;
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;

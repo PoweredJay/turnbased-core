@@ -33,6 +33,7 @@ public class Unit : MonoBehaviour
 
     public int EXP;
     public Equip weapon;
+    public Equip weaponOff;
     public Equip armor;
     public Equip charm;
 
@@ -47,7 +48,7 @@ public class Unit : MonoBehaviour
     public int darkAffinity;
     /*
         The Affinities set of values keeps track of the affinities of a unit to all 8 damage types. 
-        Each element in the array corresponds to the affinity to its respective type.
+        Each element corresponds to the affinity to its respective type.
         The value of an element corresponds to the affinity towards the damage type itself.
         A 0 is neutral. 1 is resistance (50% damage). 2 is immunity (0% damage). -1 is weakness (150% damage and attacking unit gains Flow state).
         For example, if fireAffinity = 2, then the unit is immune to fire damage.

@@ -30,7 +30,6 @@ public class SkillHUD : MonoBehaviour, ISelectHandler
             SpriteRenderer spriteRend = typeSprite.GetComponent<SpriteRenderer>();
             spriteRend.sprite = curSkill.typeSprite;
         }
-
     }
     public void OnSelect(BaseEventData eventData)
     {
