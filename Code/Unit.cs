@@ -101,7 +101,7 @@ public class Unit : MonoBehaviour
     public bool TakeDamage(int dmg)
     {
         curHP -= (dmg);
-
+        guard = false;
         if (curHP <= 0)
         {
             return true;
@@ -109,7 +109,7 @@ public class Unit : MonoBehaviour
         {
             return false;
         }
-        guard = false;
+        
     }
 
     public void HealDamage(int heal)
