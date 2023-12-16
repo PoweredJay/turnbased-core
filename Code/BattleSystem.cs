@@ -109,7 +109,7 @@ public class BattleSystem : MonoBehaviour
         EnemyUnitList.Add(enemyUnit);
         UnitList.AddRange(AllyUnitList);
         UnitList.AddRange(EnemyUnitList);
-        List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
+        //List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
 
 
         yield return new WaitForSeconds(2.5f);
