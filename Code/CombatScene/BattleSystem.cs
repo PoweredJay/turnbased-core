@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -99,7 +100,7 @@ public class BattleSystem : MonoBehaviour
         curPlayerUnit = playerGO.GetComponent<Unit>();
         GameObject enemyGO = Instantiate(enemyPrefab, enemyStation);
         enemyUnit = enemyGO.GetComponent<Unit>();
-        dialogueText.text = "You find yourself face to face with " + enemyUnit.unitName;
+        dialogueText.text = "You find yourself face to face with " + enemyUnit + ".";
 
         playerHUD1.SetHUD(curPlayerUnit);
         ActionMenu.SetActive(false);
@@ -108,7 +109,7 @@ public class BattleSystem : MonoBehaviour
         EnemyUnitList.Add(enemyUnit);
         UnitList.AddRange(AllyUnitList);
         UnitList.AddRange(EnemyUnitList);
-        List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
+        //List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
 
 
         yield return new WaitForSeconds(2.5f);
@@ -136,6 +137,10 @@ public class BattleSystem : MonoBehaviour
     }
     public void OnSkillButton()
     {
+        if (state != BattleState.PLAYERTURN1)
+        {
+            return;
+        }
         ActionMenu.SetActive(false);
         SkillMenu.SetActive(true);
         EventSystem.current.SetSelectedGameObject(SkillMenu.transform.GetChild(0).gameObject);
@@ -164,6 +169,10 @@ public class BattleSystem : MonoBehaviour
 
     public void OnBackButton()
     {
+        if(state != BattleState.PLAYERTURN1)
+        {
+            return;
+        }
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
@@ -174,8 +183,16 @@ public class BattleSystem : MonoBehaviour
         {
             return;
         }
+        StartCoroutine(GuardActive());
+    }
+
+    IEnumerator GuardActive()
+    {
         curPlayerUnit.guard = true;
-        dialogueText.text = curPlayerUnit.unitName + " is guarding for the next attack.";
+        dialogueText.text = curPlayerUnit + " is guarding for the next attack.";
+
+        yield return new WaitForSeconds(1.1f);
+
         state = BattleState.ENEMYTURN;
         StartCoroutine(EnemyTurn());
     }
@@ -283,17 +300,31 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator EnemyTurn()
     {
+        bool dead;
         EventSystem.current.SetSelectedGameObject(null);
         int incDmg = (int)(Unit.DamageCalc(enemyUnit.atkStat, curPlayerUnit.defStat, enemyUnit.weapon.power) * damageModCalc(enemyUnit, curPlayerUnit));
         dialogueText.text = enemyUnit.unitName + " attacks, dealing " + incDmg + " damage.";
 
-        bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
+        if(curPlayerUnit.guard)
+        {
+            bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
 
-        playerHUD1.SetHP(curPlayerUnit.curHP);
+            playerHUD1.SetHP(curPlayerUnit.curHP);
+            yield return new WaitForSeconds(1f);
+            curPlayerUnit.guard = false;
+            dialogueText.text = curPlayerUnit + " is no longer guarding.";
+            dead = isDead;
+        } else
+        {
+            bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
+            dead = isDead;
+
+            playerHUD1.SetHP(curPlayerUnit.curHP);
+        }
 
         yield return new WaitForSeconds(2f);
 
-        if(isDead)
+        if(dead)
         {
             state = BattleState.LOST;
             EndBattle();
