@@ -66,7 +66,7 @@ public class Skill : ScriptableObject
             case 0:
                 int incDmg = (int)(Skill.DamageCalc(atkr.magStat, defr.defStat, power) * BattleSystem.damageModCalc(atkr, defr, this));
                 bool isDead = defr.TakeDamage((incDmg));
-                dialogueText.text = "You cast " + skillName + " , dealing " + incDmg + " damage!";
+                dialogueText.text = "You cast " + skillName + ", dealing " + incDmg + " damage!";
                 atkr.MPCost(cost);
                 playerHUD.SetMP(atkr.curMP);
                 break;
@@ -74,7 +74,7 @@ public class Skill : ScriptableObject
             case 1:
                 int incHeal = Skill.HealCalc(atkr.magStat, power);
                 defr.HealDamage(incHeal);
-                dialogueText.text = "You cast " + skillName + " , healing " + defr.ToString() + " for " + incHeal + " HP.";
+                dialogueText.text = "You cast " + skillName + ", healing " + defr.ToString() + " for " + incHeal + " HP.";
                 atkr.MPCost(cost);
                 playerHUD.SetMP(atkr.curMP);
                 break;
@@ -116,7 +116,7 @@ public class Skill : ScriptableObject
                 {
                     recvr.HealDamage(incHeal);
                 }
-                dialogueText.text = "You cast " + skillName + " , healing " + incHeal + " HP to all allies.";
+                dialogueText.text = "You cast " + skillName + ", healing " + incHeal + " HP to all allies.";
                 atkr.MPCost(cost);
                 //MP Set
                 break;
