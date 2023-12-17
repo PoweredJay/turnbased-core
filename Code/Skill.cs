@@ -68,7 +68,6 @@ public class Skill : ScriptableObject
                 bool isDead = defr.TakeDamage((incDmg));
                 dialogueText.text = "You cast " + skillName + ", dealing " + incDmg + " damage!";
                 atkr.MPCost(cost);
-                playerHUD.SetMP(atkr.curMP);
                 break;
             //Heal
             case 1:
@@ -76,15 +75,44 @@ public class Skill : ScriptableObject
                 defr.HealDamage(incHeal);
                 dialogueText.text = "You cast " + skillName + ", healing " + defr.ToString() + " for " + incHeal + " HP.";
                 atkr.MPCost(cost);
-                playerHUD.SetMP(atkr.curMP);
                 break;
             //Buff
             case 2:
                 atkr.ModChange(ATKMod, DEFMod, SPDMod);
+                string outputB = "You cast " + skillName + "!";
+                if(ATKMod != 0)
+                {
+                    outputB += "\nATK increased by " + ATKMod + "stage.";
+                }
+                if(DEFMod != 0)
+                {
+                    outputB += "\nDEF increased by " + DEFMod + "stage.";
+                }
+                if(SPDMod != 0)
+                {
+                    outputB += "\nSPD increased by " + SPDMod + "stage.";                    
+                }
+                dialogueText.text = outputB;
+                atkr.MPCost(cost);
                 break;
             //Debuff
             case 3:
                 defr.ModChange(ATKMod, DEFMod, SPDMod);
+                string outputD = "You cast " + skillName + "!";
+                if(ATKMod != 0)
+                {
+                    outputD += "\nATK decreased by " + ATKMod + "stage.";
+                }
+                if(DEFMod != 0)
+                {
+                    outputD += "\nDEF decreased by " + DEFMod + "stage.";
+                }
+                if(SPDMod != 0)
+                {
+                    outputD += "\nSPD decreased by " + SPDMod + "stage.";                    
+                }
+                dialogueText.text = outputD;
+                atkr.MPCost(cost);
                 break;
             //Ailment
             case 4:
@@ -93,8 +121,9 @@ public class Skill : ScriptableObject
             case 5:
                 break;
         }
+        playerHUD.UpdateHUD(atkr);
     }
-    public void SkillUseAll(int ID, Unit atkr, List<Unit> allyList, List<Unit> enemyList, Text dialogueText)
+    public void SkillUseAll(int ID, Unit atkr, List<Unit> allyList, List<Unit> enemyList, Text dialogueText, List<BattleHUD>FriendlyHUDList)
     {
         switch(ID)
         {   
@@ -107,7 +136,6 @@ public class Skill : ScriptableObject
                 }
                 dialogueText.text = "You cast " + skillName + "!";
                 atkr.MPCost(cost);
-                //MP Set
                 break;
             //Heal
             case 1:
@@ -118,7 +146,6 @@ public class Skill : ScriptableObject
                 }
                 dialogueText.text = "You cast " + skillName + ", healing " + incHeal + " HP to all allies.";
                 atkr.MPCost(cost);
-                //MP Set
                 break;
             //Buff
             case 2:
@@ -171,5 +198,19 @@ public class Skill : ScriptableObject
             case 5:
                 break;
         }
+        foreach(BattleHUD HUD in FriendlyHUDList)
+        {
+            foreach(Unit friend in allyList)
+            {
+                HUD.UpdateHUD(friend);
+            }
+        }
+        // foreach(BattleHUD HUD in EnemyHUDList)
+        // {
+        //     foreach(Unit bad in enemyList)
+        //     {
+        //         HUD.UpdateHUD(bad);
+        //     }
+        // }
     }
 }

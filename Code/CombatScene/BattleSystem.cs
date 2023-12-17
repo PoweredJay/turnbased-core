@@ -14,10 +14,11 @@ public class BattleSystem : MonoBehaviour
 
     public GameObject playerPrefab;
     public GameObject enemyPrefab;
+    public Button skillButtonPrefab;
+    public GameObject skillButtonPanel;
 
     public Transform playerStation;
     public Transform enemyStation;
-
     public Transform grid11;
     public Transform grid12;
     public Transform grid13;
@@ -53,6 +54,8 @@ public class BattleSystem : MonoBehaviour
     public SkillHUD skillHUD8;
 
     public Text dialogueText;
+    public Text costText;
+    public GameObject typeSprite;
 
     public GameObject ActionMenu;
 
@@ -68,6 +71,8 @@ public class BattleSystem : MonoBehaviour
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;
     public List<Unit> UnitList;
+    public List<BattleHUD> PlayerHUDList;
+    public List<BattleHUD> EnemyHUDList;
     void Start()
     {
         state = BattleState.START;
@@ -78,6 +83,7 @@ public class BattleSystem : MonoBehaviour
         StartCoroutine(SetupBattle());
         EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
         lastSelect = new GameObject();
+
     }
 
     void Update()
@@ -99,15 +105,19 @@ public class BattleSystem : MonoBehaviour
         curPlayerUnit = playerGO.GetComponent<Unit>();
         GameObject enemyGO = Instantiate(enemyPrefab, enemyStation);
         enemyUnit = enemyGO.GetComponent<Unit>();
-        dialogueText.text = "You find yourself face to face with " + enemyUnit + ".";
-
-        playerHUD1.SetHUD(curPlayerUnit);
-        ActionMenu.SetActive(false);
-        SkillMenu.SetActive(false);
         AllyUnitList.Add(curPlayerUnit);
         EnemyUnitList.Add(enemyUnit);
         UnitList.AddRange(AllyUnitList);
         UnitList.AddRange(EnemyUnitList);
+        PlayerHUDList.Add(playerHUD1);
+        // PlayerHUDList.Add(playerHUD2);
+        // PlayerHUDList.Add(playerHUD3);
+        // PlayerHUDList.Add(playerHUD4);
+        // PlayerHUDList.Add(playerHUD5);
+        playerHUD1.SetHUD(curPlayerUnit);
+        dialogueText.text = "You find yourself face to face with " + enemyUnit.unitName + ".";
+        ActionMenu.SetActive(false);
+        SkillMenu.SetActive(false);
         //List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
 
 
@@ -117,12 +127,35 @@ public class BattleSystem : MonoBehaviour
         playerTurn();
     }
 
-    void playerTurn()
+    public void playerTurn()
     {
+        for (int i = SkillMenu.transform.GetChild(0).childCount - 1; i >= 0; i--)
+        {
+            if(SkillMenu.transform.GetChild(0).GetChild(i).gameObject.tag != "Back Button")
+            {
+                Destroy(SkillMenu.transform.GetChild(0).GetChild(i).gameObject);
+                Debug.Log("Deleted a button");
+            }
+        }
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
+        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(2).gameObject);
+        for(int i = 0; i < curPlayerUnit.HowManySkills(); i++)
+        {
+            Button skillButton = Instantiate(skillButtonPrefab, skillButtonPanel.transform);
+            skillButton.transform.SetParent(skillButtonPanel.transform);
+            SkillHUD skHUD = skillButton.GetComponent<SkillHUD>();
+            skHUD.buttonID = i;
+            skHUD.descriptionText = dialogueText;
+            skHUD.costText = costText;
+            skHUD.typeSprite = typeSprite;
+            skHUD.skillName.text = skHUD.whatAmI(curPlayerUnit, skHUD.buttonID);
+            skillButton.onClick.AddListener(OnSkillUse);
+            skillButton.transform.SetSiblingIndex(i);
+            Debug.Log("Created a button");
+        }
         dialogueText.text = "What would you like to do?";
+
     }
 
     public void OnAttackButton()
@@ -142,10 +175,7 @@ public class BattleSystem : MonoBehaviour
         }
         ActionMenu.SetActive(false);
         SkillMenu.SetActive(true);
-        EventSystem.current.SetSelectedGameObject(SkillMenu.transform.GetChild(0).gameObject);
-        skillHUD1.SetSkillHUD(curPlayerUnit, skillHUD1.buttonID);
-        skillHUD2.skillName.text = skillHUD2.whatAmI(curPlayerUnit, skillHUD2.buttonID);
-        
+        EventSystem.current.SetSelectedGameObject(SkillMenu.transform.GetChild(0).GetChild(0).gameObject);
     }
 
     public void OnSkillUse()
@@ -174,7 +204,8 @@ public class BattleSystem : MonoBehaviour
         }
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
+        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(2).gameObject);
+        dialogueText.text = "What would you like to do?";
     }
     public void OnGuardButton()
     {
@@ -277,7 +308,7 @@ public class BattleSystem : MonoBehaviour
         Skill curSkill = curPlayerUnit.Skills[skillNum];
         if(curSkill.All)
         {
-            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText);
+            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
         } else
         {
             curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
@@ -308,7 +339,7 @@ public class BattleSystem : MonoBehaviour
         {
             bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
 
-            playerHUD1.SetHP(curPlayerUnit.curHP);
+            playerHUD1.UpdateHUD(curPlayerUnit);
             yield return new WaitForSeconds(1f);
             curPlayerUnit.guard = false;
             dialogueText.text = curPlayerUnit + " is no longer guarding.";
@@ -318,7 +349,7 @@ public class BattleSystem : MonoBehaviour
             bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
             dead = isDead;
 
-            playerHUD1.SetHP(curPlayerUnit.curHP);
+            playerHUD1.UpdateHUD(curPlayerUnit);
         }
 
         yield return new WaitForSeconds(2f);

@@ -189,4 +189,16 @@ public class Unit : MonoBehaviour
     {
         return unitName;
     }
+    public int HowManySkills()
+    {   
+        int skillNumber = 0;
+        for(int i = 0; i < this.Skills.Length; i++)
+        {
+            if(Skills[i] != null)
+            {
+                skillNumber++;
+            }
+        }
+        return skillNumber;
+    }
 }

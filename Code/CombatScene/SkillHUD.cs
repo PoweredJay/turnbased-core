@@ -31,6 +31,10 @@ public class SkillHUD : MonoBehaviour, ISelectHandler
             spriteRend.sprite = curSkill.typeSprite;
         }
     }
+    public void DestroyButton()
+    {
+        Destroy(gameObject);
+    }
     public void OnSelect(BaseEventData eventData)
     {
         SetSkillHUD(BattleSystem.curPlayerUnit, buttonID);
