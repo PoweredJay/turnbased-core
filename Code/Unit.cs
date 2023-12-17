@@ -75,16 +75,16 @@ public class Unit : MonoBehaviour
     public ActionType action;
     void Start()
     {
-        foreach(Skill sk in Skills)
-        {
-            if(sk.passive)
-            {
-                SkillListPassive.Add(sk);
-            } else
-            {
-                SkillListActive.Add(sk);
-            }
-        }
+        // foreach(Skill sk in Skills)
+        // {
+        //     if(sk.passive)
+        //     {
+        //         SkillListPassive.Add(sk);
+        //     } else
+        //     {
+        //         SkillListActive.Add(sk);
+        //     }
+        // }
     }
     public static int DamageCalc(int aStat, int dStat, int thingPow)
     {
@@ -101,7 +101,7 @@ public class Unit : MonoBehaviour
     public bool TakeDamage(int dmg)
     {
         curHP -= (dmg);
-
+        guard = false;
         if (curHP <= 0)
         {
             return true;
@@ -109,7 +109,7 @@ public class Unit : MonoBehaviour
         {
             return false;
         }
-        guard = false;
+        
     }
 
     public void HealDamage(int heal)
