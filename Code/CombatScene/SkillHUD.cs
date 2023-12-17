@@ -19,7 +19,7 @@ public class SkillHUD : MonoBehaviour, ISelectHandler
     public void SetSkillHUD(Unit unit, int skillNum)
     {
         Skill curSkill = unit.Skills[skillNum];
-        if(skillNum.passive)
+        if(curSkill.passive)
         {
             return;
         } else
