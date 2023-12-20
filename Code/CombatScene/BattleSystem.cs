@@ -13,11 +13,19 @@ public class BattleSystem : MonoBehaviour
 {
 
     public GameObject playerPrefab;
+    public GameObject playerPrefab2;
+    public GameObject playerPrefab3;
+    public GameObject playerPrefab4;
+    public GameObject playerPrefab5;
     public GameObject enemyPrefab;
     public Button skillButtonPrefab;
     public GameObject skillButtonPanel;
 
     public Transform playerStation;
+    public Transform playerStation2;
+    public Transform playerStation3;
+    public Transform playerStation4;
+    public Transform playerStation5;
     public Transform enemyStation;
     public Transform grid11;
     public Transform grid12;
@@ -67,6 +75,11 @@ public class BattleSystem : MonoBehaviour
     public BattleState state;
     GameObject lastSelect;
     public static Unit curPlayerUnit;
+    Unit PlayerUnit1;
+    Unit PlayerUnit2;
+    Unit PlayerUnit3;
+    Unit PlayerUnit4;
+    Unit PlayerUnit5;
     public Unit selectedEnemyUnit;
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;
@@ -101,11 +114,25 @@ public class BattleSystem : MonoBehaviour
 
     IEnumerator SetupBattle()
     {
-        GameObject playerGO = Instantiate(playerPrefab, playerStation);
-        curPlayerUnit = playerGO.GetComponent<Unit>();
-        GameObject enemyGO = Instantiate(enemyPrefab, enemyStation);
-        enemyUnit = enemyGO.GetComponent<Unit>();
-        AllyUnitList.Add(curPlayerUnit);
+        GameObject playerGO1 = Instantiate(playerPrefab, playerStation);
+        curPlayerUnit = playerGO1.GetComponent<Unit>();
+        PlayerUnit1 = curPlayerUnit;
+        // GameObject playerGO2 = Instantiate(playerPrefab2, playerStation2);
+        // PlayerUnit2 = playerGO2.GetComponent<Unit>();
+        // GameObject playerGO3 = Instantiate(playerPrefab3, playerStation3);
+        // PlayerUnit3 = playerGO3.GetComponent<Unit>();
+        // GameObject playerGO4 = Instantiate(playerPrefab4, playerStation4);
+        // PlayerUnit4 = playerGO4.GetComponent<Unit>();
+        // GameObject playerGO5 = Instantiate(playerPrefab5, playerStation5);
+        // PlayerUnit5 = playerGO5.GetComponent<Unit>();
+
+        GameObject enemyGO1 = Instantiate(enemyPrefab, enemyStation);
+        enemyUnit = enemyGO1.GetComponent<Unit>();
+        AllyUnitList.Add(PlayerUnit1);
+        // AllyUnitList.Add(PlayerUnit2);
+        // AllyUnitList.Add(PlayerUnit3);
+        // AllyUnitList.Add(PlayerUnit4);
+        // AllyUnitList.Add(PlayerUnit5);
         EnemyUnitList.Add(enemyUnit);
         UnitList.AddRange(AllyUnitList);
         UnitList.AddRange(EnemyUnitList);

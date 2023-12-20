@@ -14,10 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillName: Lightburst
   desc: Weak Light damage to all enemies.
-  power: 80
-  cost: 7
+  power: 40
+  cost: 8
   tier: 1
+  ATKMod: 0
+  DEFMod: 0
+  SPDMod: 0
+  SkillCategory: 0
   Heal: 0
   All: 1
-  type: 6
+  passive: 0
   typeSprite: {fileID: 21300000, guid: 1355d1aec1b6e7f438c81864ba9007b6, type: 3}
+  type: 6
