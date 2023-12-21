@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36513cec56e2dd94589fac2b8374ab17, type: 3}
+  m_Name: heal-all-1
+  m_EditorClassIdentifier: 
+  skillName: Soothing Melody
+  desc: Weak healing for all allies.
+  power: 40
+  cost: 4
+  costHP: 0
+  tier: 1
+  ATKMod: 0
+  DEFMod: 0
+  SPDMod: 0
+  SkillCategory: 1
+  Heal: 1
+  All: 1
+  passive: 0
+  typeSprite: {fileID: 0}
+  type: 8

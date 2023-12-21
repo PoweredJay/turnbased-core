@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -254,7 +255,7 @@ public class BattleSystem : MonoBehaviour
         StartCoroutine(EnemyTurn());
     }
 
-    void EndBattle()
+    IEnumerator EndBattle()
     {
         if(state == BattleState.WON)
         {
@@ -263,6 +264,8 @@ public class BattleSystem : MonoBehaviour
         {
             dialogueText.text = "You were defeated.";
         }
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadScene("menuScene");
     }
     public static double damageModCalc(Unit atkr, Unit defr)
     {
@@ -320,7 +323,7 @@ public class BattleSystem : MonoBehaviour
         if (isDead)
         {
             state = BattleState.WON;
-            EndBattle();
+            StartCoroutine(EndBattle());
         } else
         {
             state = BattleState.ENEMYTURN;
@@ -338,14 +341,20 @@ public class BattleSystem : MonoBehaviour
             curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
         } else
         {
-            curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
+            if(curSkill.Heal)
+            {
+                curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, curPlayerUnit, dialogueText, playerHUD1);
+            } else
+            {
+                curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
+            }
         }
         yield return new WaitForSeconds(2f);
         //Update HUDs
             if (enemyUnit.curHP <= 0)
             {
                 state = BattleState.WON;
-                EndBattle();
+                StartCoroutine(EndBattle());
             } else
             {
                 state = BattleState.ENEMYTURN;
@@ -384,7 +393,7 @@ public class BattleSystem : MonoBehaviour
         if(dead)
         {
             state = BattleState.LOST;
-            EndBattle();
+            StartCoroutine(EndBattle());
         } else
         {
             state = BattleState.PLAYERTURN1;

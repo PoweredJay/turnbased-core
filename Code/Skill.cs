@@ -34,6 +34,7 @@ public class Skill : ScriptableObject
     public string desc;
     public int power;
     public int cost;
+    public int costHP;
     public int tier;
     public int ATKMod;
     public int DEFMod;
@@ -67,7 +68,7 @@ public class Skill : ScriptableObject
                 int incDmg = (int)(Skill.DamageCalc(atkr.magStat, defr.defStat, power) * BattleSystem.damageModCalc(atkr, defr, this));
                 bool isDead = defr.TakeDamage((incDmg));
                 dialogueText.text = "You cast " + skillName + ", dealing " + incDmg + " damage!";
-                atkr.MPCost(cost);
+                atkr.BothCost(cost,costHP);
                 break;
             //Heal
             case 1:
@@ -78,39 +79,105 @@ public class Skill : ScriptableObject
                 break;
             //Buff
             case 2:
-                atkr.ModChange(ATKMod, DEFMod, SPDMod);
-                string outputB = "You cast " + skillName + "!";
+                string outputB = "You cast " + skillName + "!\n ";
                 if(ATKMod != 0)
                 {
-                    outputB += "\nATK increased by " + ATKMod + "stage.";
+                    if(atkr.ATKStatus == 3)
+                    {
+                        outputB += "ATK can't go any higher! ";
+                    } else
+                    {
+                        outputB += "ATK increased by " + ATKMod + " stage";
+                        if(ATKMod > 1)
+                        {
+                            outputB += "s";
+                        }
+                        outputB += ". ";
+                    }
                 }
                 if(DEFMod != 0)
                 {
-                    outputB += "\nDEF increased by " + DEFMod + "stage.";
+                    if(atkr.DEFStatus == 3)
+                    {
+                        outputB += "DEF can't go any higher! ";
+                    } else
+                    {
+                        outputB += "DEF increased by " + DEFMod + " stage";
+                        if(DEFMod > 1)
+                        {
+                            outputB += "s";
+                        }
+                        outputB += ". ";
+                    }
                 }
                 if(SPDMod != 0)
                 {
-                    outputB += "\nSPD increased by " + SPDMod + "stage.";                    
+                    if(atkr.SPDStatus == 3)
+                    {
+                        outputB += "SPD can't go any higher!";
+                    } else
+                    {
+                        outputB += "SPD increased by " + SPDMod + " stage";
+                        if(SPDMod > 1)
+                        {
+                            outputB += "s";
+                        }
+                        outputB += ".";
+                    }                    
                 }
+                atkr.ModChange(ATKMod, DEFMod, SPDMod);
                 dialogueText.text = outputB;
                 atkr.MPCost(cost);
                 break;
             //Debuff
             case 3:
-                defr.ModChange(ATKMod, DEFMod, SPDMod);
-                string outputD = "You cast " + skillName + "!";
+                string outputD = "You cast " + skillName + "!\n ";
                 if(ATKMod != 0)
                 {
-                    outputD += "\nATK decreased by " + ATKMod + "stage.";
+                    if(defr.ATKStatus == -3)
+                    {
+                        outputD += "ATK can't go any lower! ";
+                    } else
+                    {
+                        outputD += "ATK decreased by " + (ATKMod*-1) + " stage";
+                        if(ATKMod < -1)
+                        {
+                            outputD += "s";
+                        }
+                        outputD += ". ";
+                    }
                 }
                 if(DEFMod != 0)
                 {
-                    outputD += "\nDEF decreased by " + DEFMod + "stage.";
+                    if(defr.DEFStatus == -3)
+                    {
+                        outputD += "DEF can't go any lower! ";
+                    } else
+                    {
+                        outputD += "DEF decreased by " + (DEFMod*-1) + " stage";
+                        if(DEFMod < -1)
+                        {
+                            outputD += "s";
+                        }
+                        outputD += ". ";
+                    }
                 }
                 if(SPDMod != 0)
                 {
-                    outputD += "\nSPD decreased by " + SPDMod + "stage.";                    
+                    if(defr.SPDStatus == -3)
+                    {
+                        outputD += "SPD can't go any lower!";
+                    } else
+                    {
+                        outputD += "SPD decreased by " + (SPDMod*-1) + " stage";
+                        if(SPDMod < -1)
+                        {
+                            outputD += "s";
+                        }
+                        outputD += ".";
+                    }              
                 }
+                defr.ModChange(ATKMod, DEFMod, SPDMod);
                 dialogueText.text = outputD;
                 atkr.MPCost(cost);
                 break;
@@ -135,7 +202,7 @@ public class Skill : ScriptableObject
                     bool isDead = recvr.TakeDamage((incDmg));
                 }
                 dialogueText.text = "You cast " + skillName + "!";
-                atkr.MPCost(cost);
+                atkr.BothCost(cost,costHP);
                 break;
             //Heal
             case 1:
@@ -153,18 +220,18 @@ public class Skill : ScriptableObject
                 {
                     recvr.ModChange(ATKMod, DEFMod, SPDMod);
                 }
-                string outputB = "You cast " + skillName + "!";
+                string outputB = "You cast " + skillName + "!\n ";
                 if(ATKMod != 0)
                 {
-                    outputB += "\nParty ATK increased by " + ATKMod + "stage.";
+                    outputB += "Party ATK increased by " + ATKMod + " stage. ";
                 }
                 if(DEFMod != 0)
                 {
-                    outputB += "\nParty DEF increased by " + DEFMod + "stage.";
+                    outputB += "Party DEF increased by " + DEFMod + " stage. ";
                 }
                 if(SPDMod != 0)
                 {
-                    outputB += "\nParty SPD increased by " + SPDMod + "stage.";                    
+                    outputB += "Party SPD increased by " + SPDMod + " stage.";                    
                 }
                 dialogueText.text = outputB;
                 atkr.MPCost(cost);
@@ -175,18 +242,18 @@ public class Skill : ScriptableObject
                 {
                     recvr.ModChange(ATKMod, DEFMod, SPDMod);
                 }
-                string outputD = "You cast " + skillName + "!";
+                string outputD = "You cast " + skillName + "!\n ";
                 if(ATKMod != 0)
                 {
-                    outputD += "\nEnemy ATK decreased by " + ATKMod + "stage.";
+                    outputD += "Enemy ATK decreased by " + ATKMod*-1 + " stage. ";
                 }
                 if(DEFMod != 0)
                 {
-                    outputD += "\nEnemy DEF decreased by " + DEFMod + "stage.";
-                }
+                    outputD += "Enemy DEF decreased by " + DEFMod*-1 + " stage. ";
+                } 
                 if(SPDMod != 0)
                 {
-                    outputD += "\nEnemy SPD decreased by " + SPDMod + "stage.";                    
+                    outputD += "Enemy SPD decreased by " + SPDMod*-1 + " stage.";                    
                 }
                 dialogueText.text = outputD;
                 atkr.MPCost(cost);
