@@ -14,6 +14,7 @@ public enum DamageType
     Light = 6,
     Dark = 7, 
     Support = 8, 
+    Typeless = 9,
     None 
 }
 
@@ -44,8 +45,8 @@ public class Skill : ScriptableObject
     public bool Heal;
     public bool All;
     public bool passive;
-    public Sprite typeSprite;
     public DamageType type;
+    public Sprite typeSprite;
 
     public static int DamageCalc(int atkStat, int defStat, int thingPow)
     {

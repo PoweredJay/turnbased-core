@@ -16,6 +16,7 @@ MonoBehaviour:
   desc: Weak Dark damage to one enemy.
   power: 40
   cost: 3
+  costHP: 0
   tier: 1
   ATKMod: 0
   DEFMod: 0
@@ -24,5 +25,5 @@ MonoBehaviour:
   Heal: 0
   All: 0
   passive: 0
+  type: 7
   typeSprite: {fileID: 21300000, guid: 1355d1aec1b6e7f438c81864ba9007b6, type: 3}
-  type: 0

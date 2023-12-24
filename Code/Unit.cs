@@ -73,6 +73,7 @@ public class Unit : MonoBehaviour
     public List<Skill> SkillListPassive;
     public Status Ailment;
     public ActionType action;
+    BattleHUD unitHUD;
     void Start()
     {
         // foreach(Skill sk in Skills)

@@ -26,6 +26,7 @@ public class SkillHUD : MonoBehaviour, ISelectHandler
         {
             skillName.text = curSkill.skillName;
             descriptionText.text = curSkill.desc;
+            curSkill.typeSprite = Resources.Load<Sprite>("Damage Types/" + curSkill.type.ToString());
             costText.text = "COST: " + curSkill.cost.ToString() + " MP";
             SpriteRenderer spriteRend = typeSprite.GetComponent<SpriteRenderer>();
             spriteRend.sprite = curSkill.typeSprite;

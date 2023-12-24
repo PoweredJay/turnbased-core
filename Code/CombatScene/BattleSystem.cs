@@ -20,6 +20,7 @@ public class BattleSystem : MonoBehaviour
     public GameObject playerPrefab5;
     public GameObject enemyPrefab;
     public Button skillButtonPrefab;
+    public GameObject cursorPrefab;
     public GameObject skillButtonPanel;
 
     public Transform playerStation;
@@ -162,7 +163,6 @@ public class BattleSystem : MonoBehaviour
             if(SkillMenu.transform.GetChild(0).GetChild(i).gameObject.tag != "Back Button")
             {
                 Destroy(SkillMenu.transform.GetChild(0).GetChild(i).gameObject);
-                Debug.Log("Deleted a button");
             }
         }
         ActionMenu.SetActive(true);
@@ -180,7 +180,6 @@ public class BattleSystem : MonoBehaviour
             skHUD.skillName.text = skHUD.whatAmI(curPlayerUnit, skHUD.buttonID);
             skillButton.onClick.AddListener(OnSkillUse);
             skillButton.transform.SetSiblingIndex(i);
-            Debug.Log("Created a button");
         }
         dialogueText.text = "What would you like to do?";
 
@@ -217,6 +216,11 @@ public class BattleSystem : MonoBehaviour
         if(curPlayerUnit.curMP < curPlayerUnit.Skills[skillCaller.buttonID].cost)
         {
             dialogueText.text = "Not enough MP to use " + curPlayerUnit.Skills[skillCaller.buttonID].skillName + ".";
+            return;
+        } else if(curPlayerUnit.curHP < curPlayerUnit.Skills[skillCaller.buttonID].costHP)
+        {
+            dialogueText.text = "Not enough HP to use " + curPlayerUnit.Skills[skillCaller.buttonID].skillName + ".";
+            return;
         } else
         {
             StartCoroutine(SkillUsage(skillCaller.buttonID));
@@ -330,6 +334,25 @@ public class BattleSystem : MonoBehaviour
             StartCoroutine(EnemyTurn());
         }
     }
+    // IEnumerator PlayerAttack(Unit target)
+    // {
+    //     int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, enemyUnit.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, enemyUnit));
+    //     bool isDead = enemyUnit.TakeDamage((int)(incDmg));
+
+    //     dialogueText.text = "You attack, dealing " + incDmg + " damage!";
+
+    //     yield return new WaitForSeconds(2f);
+
+    //     if (isDead)
+    //     {
+    //         state = BattleState.WON;
+    //         StartCoroutine(EndBattle());
+    //     } else
+    //     {
+    //         state = BattleState.ENEMYTURN;
+    //         StartCoroutine(EnemyTurn());
+    //     }
+    // }
 
     IEnumerator SkillUsage(int skillNum)
     {
@@ -363,6 +386,81 @@ public class BattleSystem : MonoBehaviour
         
         //
     }
+    // IEnumerator SkillUsage(int skillNum, Unit target)
+    // {
+    //     ActionMenu.SetActive(true);
+    //     SkillMenu.SetActive(false);
+    //     Skill curSkill = curPlayerUnit.Skills[skillNum];
+    //     if(curSkill.All)
+    //     {
+    //         curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
+    //     } else
+    //     {
+    //         curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, target, dialogueText, curPlayerUnit.unitHUD);
+    //     }
+    //     yield return new WaitForSeconds(2f);
+    //     //Update HUDs
+    //         if (enemyUnit.curHP <= 0)
+    //         {
+    //             state = BattleState.WON;
+    //             StartCoroutine(EndBattle());
+    //         } else
+    //         {
+    //             state = BattleState.ENEMYTURN;
+    //             StartCoroutine(EnemyTurn());
+    //         }
+        
+    //     //
+    // }
+    // IEnumerator SelectorEnemy(int actionCode)
+    // {
+    //     int curSelect = 0;
+    //     Unit curSelectedEnemy = EnemyUnitList[curSelect];
+    //     GameObject selectCursor = Instantiate(cursorPrefab, curSelectedEnemy.transform);
+    //     while(!Input.GetKeyDown(KeyCode.Return))
+    //     {
+    //         if(Input.GetKeyDown(KeyCode.UpArrow))
+    //             curSelect = (curSelect - 1) % EnemyUnitList.Count;
+    //         if(Input.GetKeyDown(KeyCode.DownArrow))
+    //             curSelect = (curSelect + 1) % EnemyUnitList.Count;
+    //     }
+    //     curSelectedEnemy = EnemyUnitList[curSelect];
+    //     if(actionCode == 0)
+    //     {
+    //         StartCoroutine(PlayerAttack(curSelectedEnemy));
+    //     } else if (actionCode == 1)
+    //     {
+    //         StartCoroutine(SkillUsage(curSelectedEnemy));
+    //     }
+    //     yield break;
+    // }
+    // IEnumerator SelectorPlayer()
+    // {
+    //     yield break;
+    // }
+    // IEnumerator WaitForKeyDown(KeyCode[] codes) {
+    //     bool pressed = false;
+    //     while (!pressed) {
+    //         foreach (KeyCode k in codes) {
+    //             if (Input.GetKey(k)) {
+    //                 pressed = true;
+    //                 SetChoiceTo(k);
+    //                 break;
+    //             }
+    //         }
+    //         yield return new WaitForEndOfFrame(); //you might want to only do this check once per frame -> yield return new WaitForEndOfFrame();
+    //     }
+    // }
+    //  private void SetChoiceTo(KeyCode keyCode) {
+    //     switch (keyCode) {
+    //         case (KeyCode.DownArrow):
+    //             choice = 0;
+    //             break;
+    //         case (KeyCode.UpArrow):
+    //             choice = 1;
+    //             break;
+    //     }
+    //  }
 
     IEnumerator EnemyTurn()
     {
