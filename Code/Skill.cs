@@ -75,7 +75,7 @@ public class Skill : ScriptableObject
             case 1:
                 int incHeal = Skill.HealCalc(atkr.magStat, power);
                 defr.HealDamage(incHeal);
-                dialogueText.text = "You cast " + skillName + ", healing " + defr.ToString() + " for " + incHeal + " HP.";
+                dialogueText.text = "You cast " + skillName + ", healing " + defr + " for " + incHeal + " HP.";
                 atkr.MPCost(cost);
                 break;
             //Buff

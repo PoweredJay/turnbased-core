@@ -223,4 +223,12 @@ public class Unit : MonoBehaviour
         }
         return skillNumber;
     }
+    public BattleHUD GetHUD()
+    {
+        return unitHUD;
+    }
+    public void SetPlayerHUD(BattleHUD HUD)
+    {
+        unitHUD = HUD;
+    }
 }

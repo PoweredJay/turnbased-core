@@ -71,11 +71,10 @@ public class BattleSystem : MonoBehaviour
 
     public GameObject SkillMenu;
     private AudioSource battleMusic;
-
-    Unit playerUnit;
     Unit enemyUnit;
+    Unit enemyUnit2;
     public BattleState state;
-    GameObject lastSelect;
+    public GameObject lastSelect;
     public static Unit curPlayerUnit;
     Unit PlayerUnit1;
     Unit PlayerUnit2;
@@ -88,6 +87,8 @@ public class BattleSystem : MonoBehaviour
     public List<Unit> UnitList;
     public List<BattleHUD> PlayerHUDList;
     public List<BattleHUD> EnemyHUDList;
+    public SelectionSystem selectSystem;
+    
     void Start()
     {
         state = BattleState.START;
@@ -104,7 +105,7 @@ public class BattleSystem : MonoBehaviour
     void Update()
     {
         Cursor.visible = false;
-        if (EventSystem.current.currentSelectedGameObject == null)
+        if (EventSystem.current.currentSelectedGameObject == null && !(selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true))
         {
             EventSystem.current.SetSelectedGameObject(lastSelect);
         }
@@ -119,6 +120,8 @@ public class BattleSystem : MonoBehaviour
         GameObject playerGO1 = Instantiate(playerPrefab, playerStation);
         curPlayerUnit = playerGO1.GetComponent<Unit>();
         PlayerUnit1 = curPlayerUnit;
+
+        PlayerUnit1.SetPlayerHUD(playerHUD1);
         // GameObject playerGO2 = Instantiate(playerPrefab2, playerStation2);
         // PlayerUnit2 = playerGO2.GetComponent<Unit>();
         // GameObject playerGO3 = Instantiate(playerPrefab3, playerStation3);
@@ -130,12 +133,16 @@ public class BattleSystem : MonoBehaviour
 
         GameObject enemyGO1 = Instantiate(enemyPrefab, enemyStation);
         enemyUnit = enemyGO1.GetComponent<Unit>();
+
+        GameObject enemyGO2 = Instantiate(enemyPrefab, playerStation);
+        enemyUnit2 = enemyGO2.GetComponent<Unit>();
         AllyUnitList.Add(PlayerUnit1);
         // AllyUnitList.Add(PlayerUnit2);
         // AllyUnitList.Add(PlayerUnit3);
         // AllyUnitList.Add(PlayerUnit4);
         // AllyUnitList.Add(PlayerUnit5);
         EnemyUnitList.Add(enemyUnit);
+        EnemyUnitList.Add(enemyUnit2);
         UnitList.AddRange(AllyUnitList);
         UnitList.AddRange(EnemyUnitList);
         PlayerHUDList.Add(playerHUD1);
@@ -192,7 +199,7 @@ public class BattleSystem : MonoBehaviour
             return;
         }
         
-        StartCoroutine(PlayerAttack());
+        StartCoroutine(selectSystem.SelectorEnemy(0,-1));
     }
     public void OnSkillButton()
     {
@@ -212,18 +219,24 @@ public class BattleSystem : MonoBehaviour
             return;
         }
         GameObject skillButton = EventSystem.current.currentSelectedGameObject;
+        // Button curButton = skillButton.gameObject.GetComponent<Button>();
         SkillHUD skillCaller = skillButton.gameObject.GetComponent<SkillHUD>();
-        if(curPlayerUnit.curMP < curPlayerUnit.Skills[skillCaller.buttonID].cost)
+        Skill curSkill = curPlayerUnit.Skills[skillCaller.buttonID];
+        if(curPlayerUnit.curMP < curSkill.cost)
         {
-            dialogueText.text = "Not enough MP to use " + curPlayerUnit.Skills[skillCaller.buttonID].skillName + ".";
+            dialogueText.text = "Not enough MP to use " + curSkill.skillName + ".";
             return;
-        } else if(curPlayerUnit.curHP < curPlayerUnit.Skills[skillCaller.buttonID].costHP)
+        } else if(curPlayerUnit.curHP < curSkill.costHP)
         {
-            dialogueText.text = "Not enough HP to use " + curPlayerUnit.Skills[skillCaller.buttonID].skillName + ".";
+            dialogueText.text = "Not enough HP to use " + curSkill.skillName + ".";
             return;
         } else
         {
-            StartCoroutine(SkillUsage(skillCaller.buttonID));
+            if((int)curSkill.SkillCategory == 0 || (int)curSkill.SkillCategory == 3 || (int)curSkill.SkillCategory == 4)
+                StartCoroutine(selectSystem.SelectorEnemy(1,skillCaller.buttonID));
+            else
+                StartCoroutine(selectSystem.SelectorPlayer(1, skillCaller.buttonID));
+            EventSystem.current.SetSelectedGameObject(null);
         }
         
     }
@@ -315,9 +328,28 @@ public class BattleSystem : MonoBehaviour
     }
     
 
-    IEnumerator PlayerAttack()
+    public IEnumerator PlayerAttack()
     {
         int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, enemyUnit.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, enemyUnit));
+        bool isDead = enemyUnit.TakeDamage((int)(incDmg));
+
+        dialogueText.text = "You attack, dealing " + incDmg + " damage!";
+
+        yield return new WaitForSeconds(2f);
+
+        if (isDead)
+        {
+            state = BattleState.WON;
+            StartCoroutine(EndBattle());
+        } else
+        {
+            state = BattleState.ENEMYTURN;
+            StartCoroutine(EnemyTurn());
+        }
+    }
+    public IEnumerator PlayerAttack(Unit target)
+    {
+        int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, target.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, target));
         bool isDead = enemyUnit.TakeDamage((int)(incDmg));
 
         dialogueText.text = "You attack, dealing " + incDmg + " damage!";
@@ -354,7 +386,7 @@ public class BattleSystem : MonoBehaviour
     //     }
     // }
 
-    IEnumerator SkillUsage(int skillNum)
+    public IEnumerator SkillUsage(int skillNum)
     {
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
@@ -371,6 +403,32 @@ public class BattleSystem : MonoBehaviour
             {
                 curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
             }
+        }
+        yield return new WaitForSeconds(2f);
+        //Update HUDs
+            if (enemyUnit.curHP <= 0)
+            {
+                state = BattleState.WON;
+                StartCoroutine(EndBattle());
+            } else
+            {
+                state = BattleState.ENEMYTURN;
+                StartCoroutine(EnemyTurn());
+            }
+        
+        //
+    }
+    public IEnumerator SkillUsage(int skillNum, Unit target)
+    {
+        ActionMenu.SetActive(true);
+        SkillMenu.SetActive(false);
+        Skill curSkill = curPlayerUnit.Skills[skillNum];
+        if(curSkill.All)
+        {
+            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
+        } else
+        {
+            curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, target, dialogueText, curPlayerUnit.GetHUD());
         }
         yield return new WaitForSeconds(2f);
         //Update HUDs
