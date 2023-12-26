@@ -20,6 +20,12 @@ public class BattleHUD : MonoBehaviour
         mpSlider.value = unit.curMP;
     }
 
+    public void UpdateHUD(Unit unit)
+    {
+        hpSlider.value = unit.curHP;
+        mpSlider.value = unit.curMP;
+    }
+
     public void SetHP(int HP)
     {
         hpSlider.value = HP;
