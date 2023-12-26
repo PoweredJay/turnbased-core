@@ -73,6 +73,7 @@ public class Unit : MonoBehaviour
     public List<Skill> SkillListPassive;
     public Status Ailment;
     public ActionType action;
+    BattleHUD unitHUD;
     void Start()
     {
         // foreach(Skill sk in Skills)
@@ -122,6 +123,27 @@ public class Unit : MonoBehaviour
         }
     }
 
+    public void BothCost(int hp, int mp)
+    {
+        curHP -= hp;
+        if (curHP < 0)
+        {
+            curHP = 0;
+        }
+        curMP -= mp;
+        if (curMP < 0)
+        {
+            curMP = 0;
+        }
+    }
+    public void HPCost(int hp)
+    {
+        curHP -= hp;
+        if (curHP < 0)
+        {
+            curHP = 0;
+        }
+    }
     public void MPCost(int mp)
     {
         curMP -= mp;
@@ -188,5 +210,25 @@ public class Unit : MonoBehaviour
     public override string ToString()
     {
         return unitName;
+    }
+    public int HowManySkills()
+    {   
+        int skillNumber = 0;
+        for(int i = 0; i < this.Skills.Length; i++)
+        {
+            if(Skills[i] != null)
+            {
+                skillNumber++;
+            }
+        }
+        return skillNumber;
+    }
+    public BattleHUD GetHUD()
+    {
+        return unitHUD;
+    }
+    public void SetPlayerHUD(BattleHUD HUD)
+    {
+        unitHUD = HUD;
     }
 }
