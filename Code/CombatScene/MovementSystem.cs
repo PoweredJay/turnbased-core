@@ -19,21 +19,24 @@ public class MovementSystem : MonoBehaviour
     public BattleSystem BattleSystem;
     [Header("Unit Management")]
     public bool moveActive;
-    public int curSelectEnemy;
-    public int curSelectAlly;
+    public int curSelectPosX;
+    public int curSelectPosY;
     public Unit curSelectedUnit;
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;
     [Header("Player Grid Transforms")]
     public List<Transform> PlayerTransformList;
     public List<Transform> EnemyTransformList;
-        /*
+    public Transform[ , ] PlayerTransformArray = new Transform[3,3];
+    /*
         Due to the way the transform lists are populated, this is how the transform positions in the 3x3 grid
         correspond to the indices in both of the transform lists.
         0  1  2
         3  4  5
         6  7  8
         This will be important for each Unit's gridPos attribute.
+        The Lists are to initialize positions in SetupBattlePos(). The Array is to handle cursor movement in Update(), and also 
+        to handle area-of-effect spells in the future (as a way to easily check surrounding tiles)
     */
     // Start is called before the first frame update
     void Start()
@@ -43,27 +46,85 @@ public class MovementSystem : MonoBehaviour
         GameObject selector = Instantiate(moveCursorPrefab);
         moveCursor = selector;
         moveCursor.SetActive(false);
-        for(int i = 0; i < playerTransformSet.transform.childCount-1; i++)
+        foreach(Transform child in playerTransformSet.transform)
         {
-            PlayerTransformList[i] = playerTransformSet.transform.GetChild(i);
+            PlayerTransformList.Add(child);
         }
-        for(int i = 0; i < enemyTransformSet.transform.childCount-1; i++)
+        foreach(Transform child in enemyTransformSet.transform)
         {
-            EnemyTransformList[i] = enemyTransformSet.transform.GetChild(i);
+            EnemyTransformList.Add(child);
+        }
+        //For the 2D array
+        for(int i = 0; i < PlayerTransformArray.GetLength(0); i++)
+        {
+            for(int j = 0; j < PlayerTransformArray.GetLength(1); j++)
+            {
+                PlayerTransformArray[j,i] = playerTransformSet.transform.GetChild(i*PlayerTransformArray.GetLength(0)+j);
+            }
+        }
+        SetupBattlePos();
+    }
+    public void SetupBattlePos()
+    {
+        foreach(Unit ally in AllyUnitList)
+        {
+            if(ally.gridPos >=0)
+                ally.transform.position = PlayerTransformList[ally.gridPos].transform.position;
+        }
+        foreach(Unit enemy in EnemyUnitList)
+        {
+            if(enemy.gridPos >= 0)
+                enemy.transform.position = EnemyTransformList[enemy.gridPos].transform.position;
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.O))
+            moveActive = !moveActive;
         if(moveActive)
         {
             nameBox.SetActive(true);
             moveCursor.SetActive(true);
+
+            if(Input.GetKeyDown(KeyCode.UpArrow))
+                curSelectPosY = (curSelectPosY + 2) % 3;
+            if(Input.GetKeyDown(KeyCode.DownArrow))
+                curSelectPosY = (curSelectPosY + 1) % 3;
+            if(Input.GetKeyDown(KeyCode.LeftArrow)) 
+                curSelectPosX = (curSelectPosX + 2) % 3;
+            if(Input.GetKeyDown(KeyCode.RightArrow))
+                curSelectPosX = (curSelectPosX + 1) % 3;
+            if(Input.GetKeyDown(KeyCode.X))
+            {
+                moveActive = false;
+                EventSystem.current.SetSelectedGameObject(BattleSystem.lastSelect);
+            }
+            if(Input.GetKeyDown(KeyCode.Return))
+            {
+                DoMove(curSelectedUnit);
+                moveActive = false;
+            }
+            // if(curSelectPos < 0 || curSelectPos >= AllyUnitList.Count())
+            //     curSelectPos = 0;
+            moveCursor.transform.position = PlayerTransformArray[curSelectPosX,curSelectPosY].transform.position;
         } else
         {
             nameBox.SetActive(false);
             moveCursor.SetActive(false);
         }
+    }
+    public IEnumerator MoveAction(Unit unit)
+    {
+        yield return new WaitForSeconds(0.1f);
+        moveActive = true;
+        curSelectedUnit = unit;
+    }
+    public void DoMove(Unit unit)
+    {
+        unit.gridPos = curSelectPosX + curSelectPosY*3;
+        unit.transform.position = PlayerTransformList[unit.gridPos].transform.position;
+        unit.moved = true;
     }
 }

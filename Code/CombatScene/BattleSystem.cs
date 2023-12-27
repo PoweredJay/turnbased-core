@@ -66,17 +66,21 @@ public class BattleSystem : MonoBehaviour
         battleMusic.Play();
         battleMusic.loop = true;
         StartCoroutine(SetupBattle());
-        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(1).gameObject);
+        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(0).GetChild(0).gameObject);
         lastSelect = new GameObject();
-
     }
 
     void Update()
     {
+        bool somethingHappening;
+        if(state == BattleState.ENEMYTURN || selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true || moveSystem.moveActive == true)
+            somethingHappening = true;
+        else
+            somethingHappening = false;
         Cursor.visible = false;
-        if (EventSystem.current.currentSelectedGameObject == null && state == BattleState.PLAYERTURN1 && !(selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true))
+        if (EventSystem.current.currentSelectedGameObject == null && !somethingHappening)
             EventSystem.current.SetSelectedGameObject(lastSelect);
-        else if(selectSystem.selectionEnemy || selectSystem.selectionPlayer)
+        else if(somethingHappening)
             EventSystem.current.SetSelectedGameObject(null);
         else
             lastSelect = EventSystem.current.currentSelectedGameObject;
@@ -131,6 +135,7 @@ public class BattleSystem : MonoBehaviour
 
     public void playerTurn()
     {
+        curPlayerUnit.moved = false;
         for (int i = SkillMenu.transform.GetChild(0).childCount - 1; i >= 0; i--)
         {
             if(SkillMenu.transform.GetChild(0).GetChild(i).gameObject.tag != "Back Button")
@@ -139,7 +144,7 @@ public class BattleSystem : MonoBehaviour
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
         if(lastSelect == null)
-            EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(2).gameObject);
+            EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(0).GetChild(0).gameObject);
         else
             EventSystem.current.SetSelectedGameObject(lastSelect);
         for(int i = 0; i < curPlayerUnit.HowManySkills(); i++)
@@ -209,7 +214,7 @@ public class BattleSystem : MonoBehaviour
             return;
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(2).gameObject);
+        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(0).GetChild(0).gameObject);
         dialogueText.text = "What would you like to do?";
     }
     public void OnGuardButton()
@@ -218,6 +223,18 @@ public class BattleSystem : MonoBehaviour
             return;
         StartCoroutine(GuardActive());
         EventSystem.current.SetSelectedGameObject(null);
+    }
+    public void OnMoveButton()
+    {
+        if(state != BattleState.PLAYERTURN1)
+            return;
+        if(curPlayerUnit.moved)
+        {
+            dialogueText.text = curPlayerUnit + " has already moved this turn.";
+            return;
+        }
+            StartCoroutine(moveSystem.MoveAction(curPlayerUnit));
+            EventSystem.current.SetSelectedGameObject(null);
     }
 
     IEnumerator GuardActive()
