@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.65, y: 1.65, z: 1.65}
+  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3028527107161798886}
@@ -57,10 +57,12 @@ MonoBehaviour:
   curHP: 81
   maxMP: 53
   curMP: 50
+  gridPos: 3
   leader: 1
   down: 0
   flow: 0
   guard: 0
+  moved: 0
   EXP: 0
   weapon: {fileID: 11400000, guid: fd30c9b378e4c63488b194d13e6f854a, type: 2}
   weaponOff: {fileID: 0}

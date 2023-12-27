@@ -26,11 +26,12 @@ public class Unit : MonoBehaviour
     public int curHP;
     public int maxMP;
     public int curMP;
-    public int gridPos;
+    public int gridPos = -1;
     public bool leader;
     public bool down = false;
     public bool flow = false;
     public bool guard = false;
+    public bool moved = false;
 
     public int EXP;
     public Equip weapon;
