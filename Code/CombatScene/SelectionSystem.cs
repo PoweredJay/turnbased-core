@@ -11,10 +11,14 @@ public class SelectionSystem : MonoBehaviour
 {
     public GameObject cursorPrefab;
     public GameObject selectCursor;
+    public GameObject nameBox;
+    public Text nameText;
     public BattleSystem BattleSystem;
     public bool selectionEnemy;
     public bool selectionPlayer;
-    public int curSelect;
+    public bool skillAll;
+    public int curSelectEnemy;
+    public int curSelectAlly;
     public int curActionCode;
     public int curSkillNum;
     public Unit curSelectedUnit;
@@ -37,11 +41,16 @@ public class SelectionSystem : MonoBehaviour
         }
         if(selectionEnemy)
         {
+            nameBox.SetActive(true);
+            if(curSelectEnemy < 0 || curSelectEnemy >= EnemyUnitList.Count)
+            {
+                curSelectEnemy = 0;
+            }
             selectCursor.SetActive(true);
             if(Input.GetKeyDown(KeyCode.UpArrow))
-                curSelect = ((curSelect - 1) + EnemyUnitList.Count) % EnemyUnitList.Count;
+                curSelectEnemy = ((curSelectEnemy - 1) + EnemyUnitList.Count) % EnemyUnitList.Count;
             if(Input.GetKeyDown(KeyCode.DownArrow))
-                curSelect = (curSelect + 1) % EnemyUnitList.Count;
+                curSelectEnemy = (curSelectEnemy + 1) % EnemyUnitList.Count;
             if(Input.GetKeyDown(KeyCode.X))
             {
                 selectionEnemy = false;
@@ -49,15 +58,28 @@ public class SelectionSystem : MonoBehaviour
             }
             if(Input.GetKeyDown(KeyCode.Return))
                 DoAction();
-            curSelectedUnit = EnemyUnitList[curSelect];
-            selectCursor.transform.position = curSelectedUnit.transform.position;
+            curSelectedUnit = EnemyUnitList[curSelectEnemy];
+            if(skillAll)
+            {
+                nameText.text = "All enemies";
+            } else
+            {
+                nameText.text = curSelectedUnit.unitName;
+            }
+
+            selectCursor.transform.position = curSelectedUnit.transform.Find("CenterLocator").position;
         } else if(selectionPlayer)
         {
+            nameBox.SetActive(true);
+            if(curSelectAlly < 0 || curSelectAlly >= AllyUnitList.Count)
+            {
+                curSelectAlly = 0;
+            }
             selectCursor.SetActive(true);
             if(Input.GetKeyDown(KeyCode.UpArrow))
-                curSelect = ((curSelect - 1) + EnemyUnitList.Count) % EnemyUnitList.Count;
+                curSelectAlly = ((curSelectAlly - 1) + AllyUnitList.Count) % AllyUnitList.Count;
             if(Input.GetKeyDown(KeyCode.DownArrow))
-                curSelect = (curSelect + 1) % AllyUnitList.Count;
+                curSelectAlly = (curSelectAlly + 1) % AllyUnitList.Count;
             if(Input.GetKeyDown(KeyCode.X))
             {
                 selectionPlayer = false;
@@ -65,11 +87,19 @@ public class SelectionSystem : MonoBehaviour
             }   
             if(Input.GetKeyDown(KeyCode.Return))
                 DoAction();
-            curSelectedUnit = AllyUnitList[curSelect];
-            selectCursor.transform.position = curSelectedUnit.transform.position;
+            curSelectedUnit = AllyUnitList[curSelectAlly];
+            if(skillAll)
+            {
+                nameText.text = "All allies";
+            } else
+            {
+                nameText.text = curSelectedUnit.unitName;
+            }
+            selectCursor.transform.position = curSelectedUnit.transform.Find("CenterLocator").position;
         } else
         {
             selectCursor.SetActive(false);
+            nameBox.SetActive(false);
         }
     }
     public IEnumerator SelectorEnemy(int actionCode, int skillNum)
@@ -78,6 +108,13 @@ public class SelectionSystem : MonoBehaviour
         curSkillNum = skillNum;
         yield return new WaitForSeconds(0.1f);
         selectionEnemy = true;
+        if(skillNum >= 0 && BattleSystem.curPlayerUnit.Skills[skillNum].All)
+        {
+            skillAll = true;
+        } else
+        {
+            skillAll = false;
+        }
     }
     public void DoAction()
     {
@@ -92,10 +129,11 @@ public class SelectionSystem : MonoBehaviour
                 StartCoroutine(BattleSystem.SkillUsage(curSkillNum, curSelectedUnit));
                 break;
         }
+        EventSystem.current.SetSelectedGameObject(null);
         selectionEnemy = false;
         selectionPlayer = false;
         selectCursor.SetActive(false);
-
+        nameBox.SetActive(false);
     }
     public IEnumerator SelectorPlayer(int actionCode, int skillNum)
     {
@@ -103,5 +141,12 @@ public class SelectionSystem : MonoBehaviour
         curSkillNum = skillNum;
         yield return new WaitForSeconds(0.1f);
         selectionPlayer = true;
+        if(skillNum >= 0 && BattleSystem.curPlayerUnit.Skills[skillNum].All)
+        {
+            skillAll = true;
+        } else
+        {
+            skillAll = false;
+        }
     }
 }

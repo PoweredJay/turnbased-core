@@ -12,7 +12,7 @@ public enum BattleState { START, PLAYERTURN1, PLAYERTURN2, PLAYERTURN3, PLAYERTU
 
 public class BattleSystem : MonoBehaviour
 {
-
+    [Header("Prefabs & GameObjects")]
     public GameObject playerPrefab;
     public GameObject playerPrefab2;
     public GameObject playerPrefab3;
@@ -24,51 +24,20 @@ public class BattleSystem : MonoBehaviour
     public GameObject skillButtonPanel;
 
     public Transform playerStation;
-    public Transform playerStation2;
-    public Transform playerStation3;
-    public Transform playerStation4;
-    public Transform playerStation5;
     public Transform enemyStation;
-    public Transform grid11;
-    public Transform grid12;
-    public Transform grid13;
-    public Transform grid21;
-    public Transform grid22;
-    public Transform grid23;
-    public Transform grid31;
-    public Transform grid32;
-    public Transform grid33;
-    /*
-    The grid transforms are nine distinct points where you can place units in a 3x3 square, with 
-    coordinates corresponding to the grid below.
-
-    11 12 13
-    21 22 23
-    31 32 33
-    Will be implemented in the future.
-    */
-
+    [Header("Presets")]
     public BattleHUD playerHUD1;
     public BattleHUD playerHUD2;
     public BattleHUD playerHUD3;
     public BattleHUD playerHUD4;
     public BattleHUD playerHUD5;
-
-    public SkillHUD skillHUD1;
-    public SkillHUD skillHUD2;
-    public SkillHUD skillHUD3;
-    public SkillHUD skillHUD4;
-    public SkillHUD skillHUD5;
-    public SkillHUD skillHUD6;
-    public SkillHUD skillHUD7;
-    public SkillHUD skillHUD8;
+    public SelectionSystem selectSystem;
+    public MovementSystem moveSystem;
 
     public Text dialogueText;
     public Text costText;
     public GameObject typeSprite;
-
     public GameObject ActionMenu;
-
     public GameObject SkillMenu;
     private AudioSource battleMusic;
     Unit enemyUnit;
@@ -81,13 +50,13 @@ public class BattleSystem : MonoBehaviour
     Unit PlayerUnit3;
     Unit PlayerUnit4;
     Unit PlayerUnit5;
+    [Header("Units")]
     public Unit selectedEnemyUnit;
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;
     public List<Unit> UnitList;
     public List<BattleHUD> PlayerHUDList;
     public List<BattleHUD> EnemyHUDList;
-    public SelectionSystem selectSystem;
     
     void Start()
     {
@@ -105,14 +74,12 @@ public class BattleSystem : MonoBehaviour
     void Update()
     {
         Cursor.visible = false;
-        if (EventSystem.current.currentSelectedGameObject == null && !(selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true))
-        {
+        if (EventSystem.current.currentSelectedGameObject == null && state == BattleState.PLAYERTURN1 && !(selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true))
             EventSystem.current.SetSelectedGameObject(lastSelect);
-        }
+        else if(selectSystem.selectionEnemy || selectSystem.selectionPlayer)
+            EventSystem.current.SetSelectedGameObject(null);
         else
-        {
             lastSelect = EventSystem.current.currentSelectedGameObject;
-        }
     }
 
     IEnumerator SetupBattle()
@@ -120,9 +87,8 @@ public class BattleSystem : MonoBehaviour
         GameObject playerGO1 = Instantiate(playerPrefab, playerStation);
         curPlayerUnit = playerGO1.GetComponent<Unit>();
         PlayerUnit1 = curPlayerUnit;
-
         PlayerUnit1.SetPlayerHUD(playerHUD1);
-        // GameObject playerGO2 = Instantiate(playerPrefab2, playerStation2);
+        // GameObject playerGO2 = Instantiate(playerPrefab, enemyStation);
         // PlayerUnit2 = playerGO2.GetComponent<Unit>();
         // GameObject playerGO3 = Instantiate(playerPrefab3, playerStation3);
         // PlayerUnit3 = playerGO3.GetComponent<Unit>();
@@ -134,15 +100,15 @@ public class BattleSystem : MonoBehaviour
         GameObject enemyGO1 = Instantiate(enemyPrefab, enemyStation);
         enemyUnit = enemyGO1.GetComponent<Unit>();
 
-        GameObject enemyGO2 = Instantiate(enemyPrefab, playerStation);
-        enemyUnit2 = enemyGO2.GetComponent<Unit>();
+        // GameObject enemyGO2 = Instantiate(enemyPrefab, playerStation);
+        // enemyUnit2 = enemyGO2.GetComponent<Unit>();
         AllyUnitList.Add(PlayerUnit1);
         // AllyUnitList.Add(PlayerUnit2);
         // AllyUnitList.Add(PlayerUnit3);
         // AllyUnitList.Add(PlayerUnit4);
         // AllyUnitList.Add(PlayerUnit5);
         EnemyUnitList.Add(enemyUnit);
-        EnemyUnitList.Add(enemyUnit2);
+        // EnemyUnitList.Add(enemyUnit2);
         UnitList.AddRange(AllyUnitList);
         UnitList.AddRange(EnemyUnitList);
         PlayerHUDList.Add(playerHUD1);
@@ -168,13 +134,14 @@ public class BattleSystem : MonoBehaviour
         for (int i = SkillMenu.transform.GetChild(0).childCount - 1; i >= 0; i--)
         {
             if(SkillMenu.transform.GetChild(0).GetChild(i).gameObject.tag != "Back Button")
-            {
                 Destroy(SkillMenu.transform.GetChild(0).GetChild(i).gameObject);
-            }
         }
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(2).gameObject);
+        if(lastSelect == null)
+            EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(2).gameObject);
+        else
+            EventSystem.current.SetSelectedGameObject(lastSelect);
         for(int i = 0; i < curPlayerUnit.HowManySkills(); i++)
         {
             Button skillButton = Instantiate(skillButtonPrefab, skillButtonPanel.transform);
@@ -195,18 +162,15 @@ public class BattleSystem : MonoBehaviour
     public void OnAttackButton()
     {
         if (state != BattleState.PLAYERTURN1)
-        {
             return;
-        }
         
         StartCoroutine(selectSystem.SelectorEnemy(0,-1));
+        EventSystem.current.SetSelectedGameObject(null);
     }
     public void OnSkillButton()
     {
         if (state != BattleState.PLAYERTURN1)
-        {
             return;
-        }
         ActionMenu.SetActive(false);
         SkillMenu.SetActive(true);
         EventSystem.current.SetSelectedGameObject(SkillMenu.transform.GetChild(0).GetChild(0).gameObject);
@@ -215,9 +179,7 @@ public class BattleSystem : MonoBehaviour
     public void OnSkillUse()
     {
         if (state != BattleState.PLAYERTURN1)
-        {
             return;
-        }
         GameObject skillButton = EventSystem.current.currentSelectedGameObject;
         // Button curButton = skillButton.gameObject.GetComponent<Button>();
         SkillHUD skillCaller = skillButton.gameObject.GetComponent<SkillHUD>();
@@ -244,9 +206,7 @@ public class BattleSystem : MonoBehaviour
     public void OnBackButton()
     {
         if(state != BattleState.PLAYERTURN1)
-        {
             return;
-        }
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(2).gameObject);
@@ -255,32 +215,27 @@ public class BattleSystem : MonoBehaviour
     public void OnGuardButton()
     {
         if(state != BattleState.PLAYERTURN1)
-        {
             return;
-        }
         StartCoroutine(GuardActive());
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     IEnumerator GuardActive()
     {
         curPlayerUnit.guard = true;
         dialogueText.text = curPlayerUnit + " is guarding for the next attack.";
-
+        state = BattleState.ENEMYTURN;  
+        EventSystem.current.SetSelectedGameObject(null);
         yield return new WaitForSeconds(1.1f);
-
-        state = BattleState.ENEMYTURN;
         StartCoroutine(EnemyTurn());
     }
 
     IEnumerator EndBattle()
     {
         if(state == BattleState.WON)
-        {
             dialogueText.text = "You won the battle!";
-        } else if (state == BattleState.LOST)
-        {
+        else if (state == BattleState.LOST)
             dialogueText.text = "You were defeated.";
-        }
         yield return new WaitForSeconds(2f);
         SceneManager.LoadScene("menuScene");
     }
@@ -289,19 +244,14 @@ public class BattleSystem : MonoBehaviour
         double damageMod = (1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus);
         int defrAff = defr.GetAffinity((int)atkr.weapon.damageType);
         if(atkr.flow)
-        {
             damageMod *= 1.1;
-        }
         if(defr.guard)
-        {
             damageMod *= 0.6 * Math.Min(1.0 - 0.5*defrAff, 1.0);
-        } else
+        else
         {
             damageMod *= (1.0 - 0.5*defrAff);
             if(defrAff == -1)
-            {
                 atkr.flow = true;
-            }
         }
         return damageMod;
     }
@@ -310,19 +260,14 @@ public class BattleSystem : MonoBehaviour
         double damageMod = (1.0 + 0.2*atkr.ATKStatus) * (1.0 - 0.2*defr.DEFStatus);
         int defrAff = defr.GetAffinity((int)skill.type);
         if(atkr.flow)
-        {
             damageMod *= 1.1;
-        }
         if(defr.guard)
-        {
             damageMod *= 0.6 * Math.Min(1.0 - 0.5*defrAff, 1.0);
-        } else
+        else
         {
             damageMod *= (1.0 - 0.5*defrAff);
             if(defrAff == -1)
-            {
                 atkr.flow = true;
-            }
         }
         return damageMod;
     }
@@ -332,6 +277,7 @@ public class BattleSystem : MonoBehaviour
     {
         int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, enemyUnit.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, enemyUnit));
         bool isDead = enemyUnit.TakeDamage((int)(incDmg));
+        EventSystem.current.SetSelectedGameObject(null);
 
         dialogueText.text = "You attack, dealing " + incDmg + " damage!";
 
@@ -351,6 +297,7 @@ public class BattleSystem : MonoBehaviour
     {
         int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, target.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, target));
         bool isDead = enemyUnit.TakeDamage((int)(incDmg));
+        EventSystem.current.SetSelectedGameObject(null);
 
         dialogueText.text = "You attack, dealing " + incDmg + " damage!";
 
@@ -390,19 +337,16 @@ public class BattleSystem : MonoBehaviour
     {
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(null);
         Skill curSkill = curPlayerUnit.Skills[skillNum];
         if(curSkill.All)
-        {
             curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
-        } else
+        else
         {
             if(curSkill.Heal)
-            {
                 curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, curPlayerUnit, dialogueText, playerHUD1);
-            } else
-            {
+            else
                 curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
-            }
         }
         yield return new WaitForSeconds(2f);
         //Update HUDs
@@ -422,14 +366,12 @@ public class BattleSystem : MonoBehaviour
     {
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(null);
         Skill curSkill = curPlayerUnit.Skills[skillNum];
         if(curSkill.All)
-        {
             curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
-        } else
-        {
+        else
             curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, target, dialogueText, curPlayerUnit.GetHUD());
-        }
         yield return new WaitForSeconds(2f);
         //Update HUDs
             if (enemyUnit.curHP <= 0)

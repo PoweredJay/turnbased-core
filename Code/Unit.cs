@@ -26,6 +26,7 @@ public class Unit : MonoBehaviour
     public int curHP;
     public int maxMP;
     public int curMP;
+    public int gridPos;
     public bool leader;
     public bool down = false;
     public bool flow = false;
