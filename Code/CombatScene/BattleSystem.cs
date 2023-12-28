@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 
-public enum BattleState { START, PLAYERTURN1, PLAYERTURN2, PLAYERTURN3, PLAYERTURN4, PLAYERTURN5, ENEMYTURN, WON, LOST }
+public enum BattleState { PLAYERTURN1, PLAYERTURN2, PLAYERTURN3, PLAYERTURN4, PLAYERTURN5, START, TURNGO, ENEMYTURN, WON, LOST }
 
 public class BattleSystem : MonoBehaviour
 {
@@ -33,6 +33,7 @@ public class BattleSystem : MonoBehaviour
     public BattleHUD playerHUD5;
     public SelectionSystem selectSystem;
     public MovementSystem moveSystem;
+    public UnitUISystem unitUISystem;
 
     public Text dialogueText;
     public Text costText;
@@ -57,6 +58,7 @@ public class BattleSystem : MonoBehaviour
     public List<Unit> UnitList;
     public List<BattleHUD> PlayerHUDList;
     public List<BattleHUD> EnemyHUDList;
+    public int curTurn;
     
     void Start()
     {
@@ -73,7 +75,7 @@ public class BattleSystem : MonoBehaviour
     void Update()
     {
         bool somethingHappening;
-        if(state == BattleState.ENEMYTURN || selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true || moveSystem.moveActive == true)
+        if(state == BattleState.START || state == BattleState.ENEMYTURN || state == BattleState.TURNGO || selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true || moveSystem.moveActive == true)
             somethingHappening = true;
         else
             somethingHappening = false;
@@ -84,22 +86,35 @@ public class BattleSystem : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(null);
         else
             lastSelect = EventSystem.current.currentSelectedGameObject;
+        if(ActionMenu.activeSelf)
+        {
+            if((state != BattleState.ENEMYTURN || state != BattleState.PLAYERTURN1) && Input.GetKeyDown(KeyCode.X))
+            {
+                revertTurn();
+            }
+        }
+        if(SkillMenu.activeSelf)
+        {
+            if(Input.GetKeyDown(KeyCode.X))
+                OnBackButton();
+        }
     }
 
     IEnumerator SetupBattle()
     {
+        state = BattleState.START;
         GameObject playerGO1 = Instantiate(playerPrefab, playerStation);
         curPlayerUnit = playerGO1.GetComponent<Unit>();
         PlayerUnit1 = curPlayerUnit;
         PlayerUnit1.SetPlayerHUD(playerHUD1);
-        // GameObject playerGO2 = Instantiate(playerPrefab, enemyStation);
-        // PlayerUnit2 = playerGO2.GetComponent<Unit>();
-        // GameObject playerGO3 = Instantiate(playerPrefab3, playerStation3);
-        // PlayerUnit3 = playerGO3.GetComponent<Unit>();
-        // GameObject playerGO4 = Instantiate(playerPrefab4, playerStation4);
-        // PlayerUnit4 = playerGO4.GetComponent<Unit>();
-        // GameObject playerGO5 = Instantiate(playerPrefab5, playerStation5);
-        // PlayerUnit5 = playerGO5.GetComponent<Unit>();
+        GameObject playerGO2 = Instantiate(playerPrefab2, playerStation);
+        PlayerUnit2 = playerGO2.GetComponent<Unit>();
+        GameObject playerGO3 = Instantiate(playerPrefab3, playerStation);
+        PlayerUnit3 = playerGO3.GetComponent<Unit>();
+        GameObject playerGO4 = Instantiate(playerPrefab4, playerStation);
+        PlayerUnit4 = playerGO4.GetComponent<Unit>();
+        GameObject playerGO5 = Instantiate(playerPrefab5, playerStation);
+        PlayerUnit5 = playerGO5.GetComponent<Unit>();
 
         GameObject enemyGO1 = Instantiate(enemyPrefab, enemyStation);
         enemyUnit = enemyGO1.GetComponent<Unit>();
@@ -107,24 +122,32 @@ public class BattleSystem : MonoBehaviour
         // GameObject enemyGO2 = Instantiate(enemyPrefab, playerStation);
         // enemyUnit2 = enemyGO2.GetComponent<Unit>();
         AllyUnitList.Add(PlayerUnit1);
-        // AllyUnitList.Add(PlayerUnit2);
-        // AllyUnitList.Add(PlayerUnit3);
-        // AllyUnitList.Add(PlayerUnit4);
-        // AllyUnitList.Add(PlayerUnit5);
+        AllyUnitList.Add(PlayerUnit2);
+        AllyUnitList.Add(PlayerUnit3);
+        AllyUnitList.Add(PlayerUnit4);
+        AllyUnitList.Add(PlayerUnit5);
         EnemyUnitList.Add(enemyUnit);
         // EnemyUnitList.Add(enemyUnit2);
         UnitList.AddRange(AllyUnitList);
         UnitList.AddRange(EnemyUnitList);
         PlayerHUDList.Add(playerHUD1);
-        // PlayerHUDList.Add(playerHUD2);
-        // PlayerHUDList.Add(playerHUD3);
-        // PlayerHUDList.Add(playerHUD4);
-        // PlayerHUDList.Add(playerHUD5);
-        playerHUD1.SetHUD(curPlayerUnit);
+        PlayerHUDList.Add(playerHUD2);
+        PlayerHUDList.Add(playerHUD3);
+        PlayerHUDList.Add(playerHUD4);
+        PlayerHUDList.Add(playerHUD5);
+        PlayerUnit1.SetPlayerHUD(playerHUD1);
+        PlayerUnit2.SetPlayerHUD(playerHUD2);
+        PlayerUnit3.SetPlayerHUD(playerHUD3);
+        PlayerUnit4.SetPlayerHUD(playerHUD4);
+        PlayerUnit5.SetPlayerHUD(playerHUD5);
+        playerHUD1.SetHUD(PlayerUnit1);
+        playerHUD2.SetHUD(PlayerUnit2);
+        playerHUD3.SetHUD(PlayerUnit3);
+        playerHUD4.SetHUD(PlayerUnit4);
+        playerHUD5.SetHUD(PlayerUnit5);
         dialogueText.text = "You find yourself face to face with " + enemyUnit.unitName + ".";
-        ActionMenu.SetActive(false);
+        ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
-        //List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
 
 
         yield return new WaitForSeconds(2.5f);
@@ -132,9 +155,44 @@ public class BattleSystem : MonoBehaviour
         state = BattleState.PLAYERTURN1;
         playerTurn();
     }
+    public bool checkPlayerTurn()
+    {
+        if(state == BattleState.PLAYERTURN1 || state == BattleState.PLAYERTURN2 || state == BattleState.PLAYERTURN3 || state == BattleState.PLAYERTURN4 || state == BattleState.PLAYERTURN5)
+            return true;
+        return false;
+    }
 
     public void playerTurn()
     {
+        switch(curTurn)
+        {
+            case 0:
+                curPlayerUnit = PlayerUnit1;
+                state = BattleState.PLAYERTURN1;
+                break;
+            case 1:
+                curPlayerUnit = PlayerUnit2;
+                state = BattleState.PLAYERTURN2;
+                break;
+            case 2:
+                curPlayerUnit = PlayerUnit3;
+                state = BattleState.PLAYERTURN3;
+                break;
+            case 3:
+                curPlayerUnit = PlayerUnit4;
+                state = BattleState.PLAYERTURN4;
+                break;
+            case 4:
+                curPlayerUnit = PlayerUnit5;
+                state = BattleState.PLAYERTURN5;
+                break;
+            case 5:
+                StartCoroutine(TurnsGo());
+                curTurn = 0;
+                return;
+        }
+        unitUISystem.SetCurrentUnit(curPlayerUnit);
+        unitUISystem.SetBoxColor();
         curPlayerUnit.moved = false;
         for (int i = SkillMenu.transform.GetChild(0).childCount - 1; i >= 0; i--)
         {
@@ -143,10 +201,8 @@ public class BattleSystem : MonoBehaviour
         }
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
-        if(lastSelect == null)
-            EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(0).GetChild(0).gameObject);
-        else
-            EventSystem.current.SetSelectedGameObject(lastSelect);
+        lastSelect = ActionMenu.transform.GetChild(0).GetChild(0).gameObject;
+        EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(0).GetChild(0).gameObject);
         for(int i = 0; i < curPlayerUnit.HowManySkills(); i++)
         {
             Button skillButton = Instantiate(skillButtonPrefab, skillButtonPanel.transform);
@@ -160,13 +216,41 @@ public class BattleSystem : MonoBehaviour
             skillButton.onClick.AddListener(OnSkillUse);
             skillButton.transform.SetSiblingIndex(i);
         }
-        dialogueText.text = "What would you like to do?";
-
+        dialogueText.text = "What will " + curPlayerUnit + " do?";
+    }
+    public void AdvanceTurn()
+    {
+        curTurn++;
+        playerTurn();
+    }
+    public void revertTurn()
+    {
+        Unit theUnit = null;
+        switch(curTurn)
+        {
+            case 1:
+                theUnit = PlayerUnit1;
+                break;
+            case 2:
+                theUnit = PlayerUnit2;
+                break;
+            case 3:
+                theUnit = PlayerUnit3;
+                break;
+            case 4:
+                theUnit = PlayerUnit4;
+                break;
+        }
+        theUnit.targetUnit = null;
+        theUnit.action = ActionType.None;
+        theUnit.actionSkillNum = 0;
+        curTurn--;
+        playerTurn();
     }
 
     public void OnAttackButton()
     {
-        if (state != BattleState.PLAYERTURN1)
+        if (!checkPlayerTurn())
             return;
         
         StartCoroutine(selectSystem.SelectorEnemy(0,-1));
@@ -174,7 +258,7 @@ public class BattleSystem : MonoBehaviour
     }
     public void OnSkillButton()
     {
-        if (state != BattleState.PLAYERTURN1)
+        if (!checkPlayerTurn())
             return;
         ActionMenu.SetActive(false);
         SkillMenu.SetActive(true);
@@ -183,7 +267,7 @@ public class BattleSystem : MonoBehaviour
 
     public void OnSkillUse()
     {
-        if (state != BattleState.PLAYERTURN1)
+        if (!checkPlayerTurn())
             return;
         GameObject skillButton = EventSystem.current.currentSelectedGameObject;
         // Button curButton = skillButton.gameObject.GetComponent<Button>();
@@ -210,18 +294,19 @@ public class BattleSystem : MonoBehaviour
 
     public void OnBackButton()
     {
-        if(state != BattleState.PLAYERTURN1)
+        if(!checkPlayerTurn())
             return;
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(ActionMenu.transform.GetChild(0).GetChild(0).gameObject);
-        dialogueText.text = "What would you like to do?";
+        dialogueText.text = "What will " + curPlayerUnit + " do?";
     }
     public void OnGuardButton()
     {
-        if(state != BattleState.PLAYERTURN1)
+        if(!checkPlayerTurn())
             return;
-        StartCoroutine(GuardActive());
+        curPlayerUnit.action = ActionType.Guard;
+        AdvanceTurn();
         EventSystem.current.SetSelectedGameObject(null);
     }
     public void OnMoveButton()
@@ -237,14 +322,12 @@ public class BattleSystem : MonoBehaviour
             EventSystem.current.SetSelectedGameObject(null);
     }
 
-    IEnumerator GuardActive()
+    IEnumerator GuardActive(Unit guarder)
     {
-        curPlayerUnit.guard = true;
-        dialogueText.text = curPlayerUnit + " is guarding for the next attack.";
-        state = BattleState.ENEMYTURN;  
+        guarder.guard = true;
+        dialogueText.text = guarder + " is guarding for the next attack.";  
         EventSystem.current.SetSelectedGameObject(null);
         yield return new WaitForSeconds(1.1f);
-        StartCoroutine(EnemyTurn());
     }
 
     IEnumerator EndBattle()
@@ -290,230 +373,98 @@ public class BattleSystem : MonoBehaviour
     }
     
 
-    public IEnumerator PlayerAttack()
+    public IEnumerator PlayerAttack(Unit attack, Unit target)
     {
-        int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, enemyUnit.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, enemyUnit));
-        bool isDead = enemyUnit.TakeDamage((int)(incDmg));
+        int incDmg = (int)(Unit.DamageCalc(attack.atkStat, target.defStat, attack.weapon.power) * damageModCalc(attack, target));
+        bool isDead = target.TakeDamage((int)(incDmg));
         EventSystem.current.SetSelectedGameObject(null);
 
-        dialogueText.text = "You attack, dealing " + incDmg + " damage!";
+        dialogueText.text = attack + " attacks " + target + ", dealing " + incDmg + " damage!";
 
         yield return new WaitForSeconds(2f);
-
-        if (isDead)
-        {
-            state = BattleState.WON;
-            StartCoroutine(EndBattle());
-        } else
-        {
-            state = BattleState.ENEMYTURN;
-            StartCoroutine(EnemyTurn());
-        }
+        //Check Win/Loss/No
     }
-    public IEnumerator PlayerAttack(Unit target)
-    {
-        int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, target.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, target));
-        bool isDead = enemyUnit.TakeDamage((int)(incDmg));
-        EventSystem.current.SetSelectedGameObject(null);
-
-        dialogueText.text = "You attack, dealing " + incDmg + " damage!";
-
-        yield return new WaitForSeconds(2f);
-
-        if (isDead)
-        {
-            state = BattleState.WON;
-            StartCoroutine(EndBattle());
-        } else
-        {
-            state = BattleState.ENEMYTURN;
-            StartCoroutine(EnemyTurn());
-        }
-    }
-    // IEnumerator PlayerAttack(Unit target)
-    // {
-    //     int incDmg = (int)(Unit.DamageCalc(curPlayerUnit.atkStat, enemyUnit.defStat, curPlayerUnit.weapon.power) * damageModCalc(curPlayerUnit, enemyUnit));
-    //     bool isDead = enemyUnit.TakeDamage((int)(incDmg));
-
-    //     dialogueText.text = "You attack, dealing " + incDmg + " damage!";
-
-    //     yield return new WaitForSeconds(2f);
-
-    //     if (isDead)
-    //     {
-    //         state = BattleState.WON;
-    //         StartCoroutine(EndBattle());
-    //     } else
-    //     {
-    //         state = BattleState.ENEMYTURN;
-    //         StartCoroutine(EnemyTurn());
-    //     }
-    // }
-
-    public IEnumerator SkillUsage(int skillNum)
+    public IEnumerator SkillUsage(int skillNum, Unit attack, Unit target)
     {
         ActionMenu.SetActive(true);
         SkillMenu.SetActive(false);
         EventSystem.current.SetSelectedGameObject(null);
-        Skill curSkill = curPlayerUnit.Skills[skillNum];
+        Skill curSkill = attack.Skills[skillNum];
         if(curSkill.All)
-            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
+            curSkill.SkillUseAll((int)curSkill.SkillCategory, attack, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
         else
-        {
-            if(curSkill.Heal)
-                curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, curPlayerUnit, dialogueText, playerHUD1);
-            else
-                curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, enemyUnit, dialogueText, playerHUD1);
-        }
+            curSkill.SkillUseSingle((int)curSkill.SkillCategory, attack, target, dialogueText, attack.GetHUD());
         yield return new WaitForSeconds(2f);
-        //Update HUDs
-            if (enemyUnit.curHP <= 0)
-            {
-                state = BattleState.WON;
-                StartCoroutine(EndBattle());
-            } else
-            {
-                state = BattleState.ENEMYTURN;
-                StartCoroutine(EnemyTurn());
-            }
-        
-        //
+        //Check Win/Loss/No
     }
-    public IEnumerator SkillUsage(int skillNum, Unit target)
-    {
-        ActionMenu.SetActive(true);
-        SkillMenu.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(null);
-        Skill curSkill = curPlayerUnit.Skills[skillNum];
-        if(curSkill.All)
-            curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
-        else
-            curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, target, dialogueText, curPlayerUnit.GetHUD());
-        yield return new WaitForSeconds(2f);
-        //Update HUDs
-            if (enemyUnit.curHP <= 0)
-            {
-                state = BattleState.WON;
-                StartCoroutine(EndBattle());
-            } else
-            {
-                state = BattleState.ENEMYTURN;
-                StartCoroutine(EnemyTurn());
-            }
-        
-        //
-    }
-    // IEnumerator SkillUsage(int skillNum, Unit target)
-    // {
-    //     ActionMenu.SetActive(true);
-    //     SkillMenu.SetActive(false);
-    //     Skill curSkill = curPlayerUnit.Skills[skillNum];
-    //     if(curSkill.All)
-    //     {
-    //         curSkill.SkillUseAll((int)curSkill.SkillCategory, curPlayerUnit, AllyUnitList, EnemyUnitList, dialogueText, PlayerHUDList);
-    //     } else
-    //     {
-    //         curSkill.SkillUseSingle((int)curSkill.SkillCategory, curPlayerUnit, target, dialogueText, curPlayerUnit.unitHUD);
-    //     }
-    //     yield return new WaitForSeconds(2f);
-    //     //Update HUDs
-    //         if (enemyUnit.curHP <= 0)
-    //         {
-    //             state = BattleState.WON;
-    //             StartCoroutine(EndBattle());
-    //         } else
-    //         {
-    //             state = BattleState.ENEMYTURN;
-    //             StartCoroutine(EnemyTurn());
-    //         }
-        
-    //     //
-    // }
-    // IEnumerator SelectorEnemy(int actionCode)
-    // {
-    //     int curSelect = 0;
-    //     Unit curSelectedEnemy = EnemyUnitList[curSelect];
-    //     GameObject selectCursor = Instantiate(cursorPrefab, curSelectedEnemy.transform);
-    //     while(!Input.GetKeyDown(KeyCode.Return))
-    //     {
-    //         if(Input.GetKeyDown(KeyCode.UpArrow))
-    //             curSelect = (curSelect - 1) % EnemyUnitList.Count;
-    //         if(Input.GetKeyDown(KeyCode.DownArrow))
-    //             curSelect = (curSelect + 1) % EnemyUnitList.Count;
-    //     }
-    //     curSelectedEnemy = EnemyUnitList[curSelect];
-    //     if(actionCode == 0)
-    //     {
-    //         StartCoroutine(PlayerAttack(curSelectedEnemy));
-    //     } else if (actionCode == 1)
-    //     {
-    //         StartCoroutine(SkillUsage(curSelectedEnemy));
-    //     }
-    //     yield break;
-    // }
-    // IEnumerator SelectorPlayer()
-    // {
-    //     yield break;
-    // }
-    // IEnumerator WaitForKeyDown(KeyCode[] codes) {
-    //     bool pressed = false;
-    //     while (!pressed) {
-    //         foreach (KeyCode k in codes) {
-    //             if (Input.GetKey(k)) {
-    //                 pressed = true;
-    //                 SetChoiceTo(k);
-    //                 break;
-    //             }
-    //         }
-    //         yield return new WaitForEndOfFrame(); //you might want to only do this check once per frame -> yield return new WaitForEndOfFrame();
-    //     }
-    // }
-    //  private void SetChoiceTo(KeyCode keyCode) {
-    //     switch (keyCode) {
-    //         case (KeyCode.DownArrow):
-    //             choice = 0;
-    //             break;
-    //         case (KeyCode.UpArrow):
-    //             choice = 1;
-    //             break;
-    //     }
-    //  }
-
-    IEnumerator EnemyTurn()
+    IEnumerator EnemyTurn(Unit enemy)
     {
         bool dead;
         EventSystem.current.SetSelectedGameObject(null);
-        int incDmg = (int)(Unit.DamageCalc(enemyUnit.atkStat, curPlayerUnit.defStat, enemyUnit.weapon.power) * damageModCalc(enemyUnit, curPlayerUnit));
-        dialogueText.text = enemyUnit.unitName + " attacks, dealing " + incDmg + " damage.";
-
-        if(curPlayerUnit.guard)
+        Unit selectedUnit = AllyUnitList[(int)UnityEngine.Random.Range(0f,4f)];
+        while(selectedUnit.curHP <=0)
         {
-            bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
+            selectedUnit = AllyUnitList[(int)UnityEngine.Random.Range(0f,4f)];
+        }
+        int incDmg = (int)(Unit.DamageCalc(enemy.atkStat, selectedUnit.defStat, enemy.weapon.power) * damageModCalc(enemyUnit, curPlayerUnit));
+        dialogueText.text = enemy + " attacks " + selectedUnit + ", dealing " + incDmg + " damage.";
 
-            playerHUD1.UpdateHUD(curPlayerUnit);
-            yield return new WaitForSeconds(1f);
-            curPlayerUnit.guard = false;
+        if(selectedUnit.guard)
+        {
+            bool isDead = selectedUnit.TakeDamage((int)(incDmg));
+
+            selectedUnit.GetHUD().UpdateHUD(selectedUnit);
+            yield return new WaitForSeconds(0.6f);
+            selectedUnit.guard = false;
             dialogueText.text = curPlayerUnit + " is no longer guarding.";
             dead = isDead;
         } else
         {
-            bool isDead = curPlayerUnit.TakeDamage((int)(incDmg));
+            bool isDead = selectedUnit.TakeDamage((int)(incDmg));
             dead = isDead;
 
-            playerHUD1.UpdateHUD(curPlayerUnit);
+            selectedUnit.GetHUD().UpdateHUD(selectedUnit);
         }
 
         yield return new WaitForSeconds(2f);
-
-        if(dead)
-        {
-            state = BattleState.LOST;
-            StartCoroutine(EndBattle());
-        } else
-        {
-            state = BattleState.PLAYERTURN1;
-            playerTurn();
-        }
     }
 
+    public IEnumerator TurnsGo()
+    {
+        unitUISystem.ResetBoxColor();
+        state = BattleState.TURNGO;
+        List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();
+        foreach(Unit unit in UnitListSPD)
+        {
+            if(unit.action == ActionType.Guard)
+                yield return GuardActive(unit);
+        }
+        foreach(Unit unit in UnitListSPD)
+        {
+            if(unit.ally)
+            {
+                switch(unit.action)
+                {
+                case ActionType.Attack:
+                    yield return PlayerAttack(unit, unit.targetUnit);
+                    break;
+                case ActionType.Skill:
+                    yield return SkillUsage(unit.actionSkillNum, unit, unit.targetUnit);
+                    break;
+                case ActionType.Leader:
+                    break;
+                case ActionType.Team:
+                    break;
+                case ActionType.Item:
+                    break;
+                case ActionType.Flee:
+                    break;
+                }
+            } else
+            {
+                yield return EnemyTurn(unit);
+            }
+        }
+        playerTurn();
+    }
 }
