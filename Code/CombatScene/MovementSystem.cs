@@ -16,6 +16,7 @@ public class MovementSystem : MonoBehaviour
     public Text nameText;
     public GameObject playerTransformSet;
     public GameObject enemyTransformSet;
+    public GameObject HUDTransformSet;
     public BattleSystem BattleSystem;
     [Header("Unit Management")]
     public bool moveActive;
@@ -27,6 +28,7 @@ public class MovementSystem : MonoBehaviour
     [Header("Player Grid Transforms")]
     public List<Transform> PlayerTransformList;
     public List<Transform> EnemyTransformList;
+    public List<Transform> HUDTransformList;
     public Transform[ , ] PlayerTransformArray = new Transform[3,3];
     /*
         Due to the way the transform lists are populated, this is how the transform positions in the 3x3 grid
@@ -54,6 +56,10 @@ public class MovementSystem : MonoBehaviour
         {
             EnemyTransformList.Add(child);
         }
+        foreach(Transform child in HUDTransformSet.transform)
+        {
+            HUDTransformList.Add(child);
+        }
         //For the 2D array
         for(int i = 0; i < PlayerTransformArray.GetLength(0); i++)
         {
@@ -68,8 +74,9 @@ public class MovementSystem : MonoBehaviour
     {
         foreach(Unit ally in AllyUnitList)
         {
-            if(ally.gridPos >=0)
                 ally.transform.position = PlayerTransformList[ally.gridPos].transform.position;
+                BattleHUD allyHUD = ally.GetHUD();
+                allyHUD.transform.position = HUDTransformList[ally.gridPos].transform.position;
         }
         foreach(Unit enemy in EnemyUnitList)
         {
@@ -103,6 +110,15 @@ public class MovementSystem : MonoBehaviour
             }
             if(Input.GetKeyDown(KeyCode.Return))
             {
+                int pos = curSelectPosX + curSelectPosY*3;
+                foreach(Unit friend in AllyUnitList)
+                {
+                    if(friend.gridPos == pos)
+                    {
+                        nameText.text = "Can't move there!";
+                        return;
+                    }
+                }
                 DoMove(curSelectedUnit);
                 moveActive = false;
             }
@@ -118,6 +134,7 @@ public class MovementSystem : MonoBehaviour
     public IEnumerator MoveAction(Unit unit)
     {
         yield return new WaitForSeconds(0.1f);
+        nameText.text = "Move to...";
         moveActive = true;
         curSelectedUnit = unit;
     }
@@ -125,6 +142,8 @@ public class MovementSystem : MonoBehaviour
     {
         unit.gridPos = curSelectPosX + curSelectPosY*3;
         unit.transform.position = PlayerTransformList[unit.gridPos].transform.position;
+        BattleHUD unitHUD = unit.GetHUD();
+        unitHUD.transform.position = HUDTransformList[unit.gridPos].transform.position;
         unit.moved = true;
     }
 }

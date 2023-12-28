@@ -9,9 +9,9 @@ public enum ActionType
     Leader = 2,
     Team = 3,
     Guard = 4,
-    Move = 5,
-    Item = 6,
-    Flee = 7
+    Item = 5,
+    Flee = 6,
+    None
 }
 public class Unit : MonoBehaviour
 {
@@ -32,6 +32,7 @@ public class Unit : MonoBehaviour
     public bool flow = false;
     public bool guard = false;
     public bool moved = false;
+    public bool ally;
 
     public int EXP;
     public Equip weapon;
@@ -75,6 +76,8 @@ public class Unit : MonoBehaviour
     public List<Skill> SkillListPassive;
     public Status Ailment;
     public ActionType action;
+    public int actionSkillNum;
+    public Unit targetUnit;
     BattleHUD unitHUD;
     void Start()
     {

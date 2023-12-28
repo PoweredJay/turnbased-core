@@ -9,6 +9,8 @@ public class BattleHUD : MonoBehaviour
     public Text levelText;
     public Slider hpSlider;
     public Slider mpSlider;
+    public Text HPText;
+    public Text MPText;
 
     public void SetHUD(Unit unit)
     {
@@ -18,20 +20,15 @@ public class BattleHUD : MonoBehaviour
         hpSlider.value = unit.curHP;
         mpSlider.maxValue = unit.maxMP;
         mpSlider.value = unit.curMP;
+        HPText.text = unit.curHP + "/" + unit.maxHP;
+        MPText.text = unit.curMP + "/" + unit.maxMP;
     }
 
     public void UpdateHUD(Unit unit)
     {
         hpSlider.value = unit.curHP;
         mpSlider.value = unit.curMP;
-    }
-
-    public void SetHP(int HP)
-    {
-        hpSlider.value = HP;
-    }
-    public void SetMP(int MP)
-    {
-        mpSlider.value = MP;
+        HPText.text = unit.curHP + "/" + unit.maxHP;
+        MPText.text = unit.curMP + "/" + unit.maxMP;
     }
 }

@@ -122,11 +122,18 @@ public class SelectionSystem : MonoBehaviour
         {
             //Attack
             case 0:
-                StartCoroutine(BattleSystem.PlayerAttack(curSelectedUnit));
+                BattleSystem.curPlayerUnit.targetUnit = curSelectedUnit;
+                BattleSystem.curPlayerUnit.action = ActionType.Attack;
+                BattleSystem.AdvanceTurn();
+                // StartCoroutine(BattleSystem.PlayerAttack(curSelectedUnit));
                 break;
             //Skill
             case 1:
-                StartCoroutine(BattleSystem.SkillUsage(curSkillNum, curSelectedUnit));
+                BattleSystem.curPlayerUnit.targetUnit = curSelectedUnit;
+                BattleSystem.curPlayerUnit.actionSkillNum = curSkillNum;
+                BattleSystem.curPlayerUnit.action = ActionType.Skill;
+                BattleSystem.AdvanceTurn();
+                // StartCoroutine(BattleSystem.SkillUsage(curSkillNum, curSelectedUnit));
                 break;
         }
         EventSystem.current.SetSelectedGameObject(null);

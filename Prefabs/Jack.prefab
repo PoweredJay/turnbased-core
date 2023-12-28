@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1260176093822635770}
   - component: {fileID: -3233184483557928002}
   m_Layer: 0
-  m_Name: Zach
+  m_Name: Jack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -47,43 +47,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3486514cf67fc1a488e322d18d7fdf01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitName: Zach
+  unitName: Jack
   unitLevel: 1
-  atkStat: 5
-  magStat: 5
-  defStat: 6
-  spdStat: 5
-  maxHP: 78
-  curHP: 78
-  maxMP: 47
-  curMP: 47
-  gridPos: 5
-  leader: 1
+  atkStat: 4
+  magStat: 6
+  defStat: 3
+  spdStat: 8
+  maxHP: 71
+  curHP: 71
+  maxMP: 59
+  curMP: 59
+  gridPos: 6
+  leader: 0
   down: 0
   flow: 0
   guard: 0
   moved: 0
   ally: 1
   EXP: 0
-  weapon: {fileID: 11400000, guid: fd30c9b378e4c63488b194d13e6f854a, type: 2}
+  weapon: {fileID: 11400000, guid: c2059bf1ab5ba8d4facef5d1f26e5676, type: 2}
   weaponOff: {fileID: 0}
   armor: {fileID: 0}
   charm: {fileID: 0}
   bludgeoningAffinity: 0
   piercingAffinity: 0
   slashingAffinity: 0
-  fireAffinity: 0
+  fireAffinity: -1
   waterAffinity: 0
-  airAffinity: 0
-  lightAffinity: 1
-  darkAffinity: -1
+  airAffinity: 1
+  lightAffinity: 0
+  darkAffinity: 0
   ATKStatus: 0
   DEFStatus: 0
   SPDStatus: 0
   Skills:
-  - {fileID: 11400000, guid: dc3616609b1dd1b41a7216d22a5310a1, type: 2}
-  - {fileID: 11400000, guid: c0b3dfc95ad5ce945a3b85fe0879a57c, type: 2}
-  - {fileID: 11400000, guid: 157070821bb5f4142865b463642de713, type: 2}
+  - {fileID: 11400000, guid: 0476a85e3bbacca49aede1378bb4e89d, type: 2}
+  - {fileID: 11400000, guid: 8375ef8b6c7c5ba4c8c483b3530bd7c3, type: 2}
+  - {fileID: 11400000, guid: 7b49fcd290fce0d4897a599e9c50aabc, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -138,7 +138,7 @@ SpriteRenderer:
   m_SortingLayer: -1
   m_SortingOrder: 0
   m_Sprite: {fileID: 223274257, guid: fa438dcca4da2f94f98328e12e538b40, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.6367924, g: 0.6429492, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

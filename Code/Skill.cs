@@ -68,19 +68,19 @@ public class Skill : ScriptableObject
             case 0:
                 int incDmg = (int)(Skill.DamageCalc(atkr.magStat, defr.defStat, power) * BattleSystem.damageModCalc(atkr, defr, this));
                 bool isDead = defr.TakeDamage((incDmg));
-                dialogueText.text = "You cast " + skillName + ", dealing " + incDmg + " damage!";
-                atkr.BothCost(cost,costHP);
+                dialogueText.text = atkr + " casts " + skillName + " on " + defr + ", dealing " + incDmg + " damage!";
+                atkr.BothCost(costHP,cost);
                 break;
             //Heal
             case 1:
                 int incHeal = Skill.HealCalc(atkr.magStat, power);
                 defr.HealDamage(incHeal);
-                dialogueText.text = "You cast " + skillName + ", healing " + defr + " for " + incHeal + " HP.";
+                dialogueText.text = atkr + " casts " + skillName + ", healing " + defr + " for " + incHeal + " HP.";
                 atkr.MPCost(cost);
                 break;
             //Buff
             case 2:
-                string outputB = "You cast " + skillName + "!\n ";
+                string outputB = atkr + " casts " + skillName + " on " + defr + "!\n ";
                 if(ATKMod != 0)
                 {
                     if(atkr.ATKStatus == 3)
@@ -132,7 +132,7 @@ public class Skill : ScriptableObject
                 break;
             //Debuff
             case 3:
-                string outputD = "You cast " + skillName + "!\n ";
+                string outputD = atkr + " casts " + skillName + " on " + defr + "!\n ";
                 if(ATKMod != 0)
                 {
                     if(defr.ATKStatus == -3)
@@ -202,8 +202,8 @@ public class Skill : ScriptableObject
                     int incDmg = (int)(Skill.DamageCalc(atkr.magStat, recvr.defStat, power) * BattleSystem.damageModCalc(atkr, recvr, this));
                     bool isDead = recvr.TakeDamage((incDmg));
                 }
-                dialogueText.text = "You cast " + skillName + "!";
-                atkr.BothCost(cost,costHP);
+                dialogueText.text = atkr + " casts " + skillName + "!";
+                atkr.BothCost(costHP,cost);
                 break;
             //Heal
             case 1:
@@ -212,7 +212,7 @@ public class Skill : ScriptableObject
                 {
                     recvr.HealDamage(incHeal);
                 }
-                dialogueText.text = "You cast " + skillName + ", healing " + incHeal + " HP to all allies.";
+                dialogueText.text = atkr + " casts " + skillName + ", healing " + incHeal + " HP to all allies.";
                 atkr.MPCost(cost);
                 break;
             //Buff
@@ -221,7 +221,7 @@ public class Skill : ScriptableObject
                 {
                     recvr.ModChange(ATKMod, DEFMod, SPDMod);
                 }
-                string outputB = "You cast " + skillName + "!\n ";
+                string outputB = atkr + " casts " + skillName + "!\n ";
                 if(ATKMod != 0)
                 {
                     outputB += "Party ATK increased by " + ATKMod + " stage. ";
@@ -243,7 +243,7 @@ public class Skill : ScriptableObject
                 {
                     recvr.ModChange(ATKMod, DEFMod, SPDMod);
                 }
-                string outputD = "You cast " + skillName + "!\n ";
+                string outputD = atkr + " casts " + skillName + "!\n ";
                 if(ATKMod != 0)
                 {
                     outputD += "Enemy ATK decreased by " + ATKMod*-1 + " stage. ";
