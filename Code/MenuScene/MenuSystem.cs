@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MenuSystem : MonoBehaviour
 {
@@ -9,12 +11,9 @@ public class MenuSystem : MonoBehaviour
 
     public GameObject mainMenu;
     public GameObject optionsMenu;
-<<<<<<< Updated upstream
-=======
     public GameObject keybindsMenu;
     public GameObject audioMenu;
     GameObject lastSelect;
->>>>>>> Stashed changes
 
     public Slider volumeSlider;
     public Toggle musicToggle;
@@ -23,14 +22,14 @@ public class MenuSystem : MonoBehaviour
     public static float volume = 1;
     public static bool musicOn = true;
     public static bool sfxOn = true;
+    GameObject lastSelect;
 
     void Start()
     {
+        Cursor.visible = false;
         menuMusic = GetComponent<AudioSource>();
         menuMusic.Play();
         menuMusic.loop = true;
-<<<<<<< Updated upstream
-=======
         EventSystem.current.SetSelectedGameObject(mainMenu.transform.GetChild(0).gameObject);
         lastSelect = new GameObject();
     }
@@ -44,7 +43,10 @@ public class MenuSystem : MonoBehaviour
         {
             menuMusic.volume = volume;
         }
-
+        if(!optionsMenu.activeInHierarchy)
+        {
+            Cursor.visible = false;
+        }
         if (EventSystem.current.currentSelectedGameObject == null)
         {
             EventSystem.current.SetSelectedGameObject(lastSelect);
@@ -52,7 +54,6 @@ public class MenuSystem : MonoBehaviour
         {
             lastSelect = EventSystem.current.currentSelectedGameObject;
         }
->>>>>>> Stashed changes
     }
 
     // button hell
@@ -65,6 +66,7 @@ public class MenuSystem : MonoBehaviour
     {
         mainMenu.SetActive(false);
         optionsMenu.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(optionsMenu.transform.GetChild(0).gameObject);
     }
 
     public void MainQuitButton()
@@ -91,6 +93,7 @@ public class MenuSystem : MonoBehaviour
     {
         optionsMenu.SetActive(false);
         mainMenu.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(mainMenu.transform.GetChild(0).gameObject);
     }
 
     public void AudioBackButton()

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65ff8e478a4cbc84ca00297917fbf093, type: 3}
+  m_Name: Harvesting Scythe
+  m_EditorClassIdentifier: 
+  equipName: Harvest Scythe
+  desc: A sickle used to harvest crops.
+  power: 28
+  twoHand: 1
+  equipSprite: {fileID: 0}
+  skillGranted: {fileID: 0}
+  equipType: 0
+  damageType: 2
+  damageType2: 10

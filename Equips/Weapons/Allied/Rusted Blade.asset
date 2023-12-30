@@ -15,7 +15,9 @@ MonoBehaviour:
   equipName: Rusted Blade
   desc: An old, worn-out training blade. Should get the job done.
   power: 26
+  twoHand: 0
   equipSprite: {fileID: 0}
   skillGranted: {fileID: 0}
   equipType: 0
   damageType: 2
+  damageType2: 10

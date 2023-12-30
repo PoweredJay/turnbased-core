@@ -9,9 +9,9 @@ public enum ActionType
     Leader = 2,
     Team = 3,
     Guard = 4,
-    Move = 5,
-    Item = 6,
-    Flee = 7
+    Item = 5,
+    Flee = 6,
+    None
 }
 public class Unit : MonoBehaviour
 {
@@ -26,10 +26,13 @@ public class Unit : MonoBehaviour
     public int curHP;
     public int maxMP;
     public int curMP;
+    public int gridPos = -1;
     public bool leader;
     public bool down = false;
     public bool flow = false;
     public bool guard = false;
+    public bool moved = false;
+    public bool ally;
 
     public int EXP;
     public Equip weapon;
@@ -73,6 +76,9 @@ public class Unit : MonoBehaviour
     public List<Skill> SkillListPassive;
     public Status Ailment;
     public ActionType action;
+    public int actionSkillNum;
+    public Unit targetUnit;
+    BattleHUD unitHUD;
     void Start()
     {
         // foreach(Skill sk in Skills)
@@ -122,6 +128,27 @@ public class Unit : MonoBehaviour
         }
     }
 
+    public void BothCost(int hp, int mp)
+    {
+        curHP -= hp;
+        if (curHP < 0)
+        {
+            curHP = 0;
+        }
+        curMP -= mp;
+        if (curMP < 0)
+        {
+            curMP = 0;
+        }
+    }
+    public void HPCost(int hp)
+    {
+        curHP -= hp;
+        if (curHP < 0)
+        {
+            curHP = 0;
+        }
+    }
     public void MPCost(int mp)
     {
         curMP -= mp;
@@ -188,5 +215,25 @@ public class Unit : MonoBehaviour
     public override string ToString()
     {
         return unitName;
+    }
+    public int HowManySkills()
+    {   
+        int skillNumber = 0;
+        for(int i = 0; i < this.Skills.Length; i++)
+        {
+            if(Skills[i] != null)
+            {
+                skillNumber++;
+            }
+        }
+        return skillNumber;
+    }
+    public BattleHUD GetHUD()
+    {
+        return unitHUD;
+    }
+    public void SetPlayerHUD(BattleHUD HUD)
+    {
+        unitHUD = HUD;
     }
 }
