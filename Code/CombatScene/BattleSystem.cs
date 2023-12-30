@@ -88,6 +88,7 @@ public class BattleSystem : MonoBehaviour
             lastSelect = EventSystem.current.currentSelectedGameObject;
         if(ActionMenu.activeSelf)
         {
+
             if(!somethingHappening && Input.GetKeyDown(KeyCode.X))
             {
                 revertTurn();
@@ -382,7 +383,7 @@ public class BattleSystem : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(null);
 
         dialogueText.text = attack + " attacks " + target + ", dealing " + incDmg + " damage!";
-
+        
         yield return new WaitForSeconds(2f);
         //Check Win/Loss/No
     }

@@ -62,6 +62,7 @@ public class MovementSystem : MonoBehaviour
         {
             HUDTransformList.Add(child);
         }
+
         //For the 2D arrays
         for(int i = 0; i < PlayerTransformArray.GetLength(0); i++)
         {
