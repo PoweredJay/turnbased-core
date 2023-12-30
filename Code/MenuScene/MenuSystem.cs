@@ -13,7 +13,6 @@ public class MenuSystem : MonoBehaviour
     public GameObject optionsMenu;
     public GameObject keybindsMenu;
     public GameObject audioMenu;
-    GameObject lastSelect;
 
     public Slider volumeSlider;
     public Toggle musicToggle;
