@@ -88,7 +88,7 @@ public class BattleSystem : MonoBehaviour
             lastSelect = EventSystem.current.currentSelectedGameObject;
         if(ActionMenu.activeSelf)
         {
-            if((state != BattleState.ENEMYTURN || state != BattleState.PLAYERTURN1) && Input.GetKeyDown(KeyCode.X))
+            if(!somethingHappening && Input.GetKeyDown(KeyCode.X))
             {
                 revertTurn();
             }
@@ -226,6 +226,8 @@ public class BattleSystem : MonoBehaviour
     public void revertTurn()
     {
         Unit theUnit = null;
+        if(curTurn == 0)
+            return;
         switch(curTurn)
         {
             case 1:
@@ -311,7 +313,7 @@ public class BattleSystem : MonoBehaviour
     }
     public void OnMoveButton()
     {
-        if(state != BattleState.PLAYERTURN1)
+        if(!checkPlayerTurn())
             return;
         if(curPlayerUnit.moved)
         {
@@ -431,6 +433,8 @@ public class BattleSystem : MonoBehaviour
 
     public IEnumerator TurnsGo()
     {
+        ActionMenu.SetActive(true);
+        SkillMenu.SetActive(false);
         unitUISystem.ResetBoxColor();
         state = BattleState.TURNGO;
         List<Unit> UnitListSPD = UnitList.OrderByDescending(unit=>unit.spdStat).ToList();

@@ -14,16 +14,23 @@ public class SelectionSystem : MonoBehaviour
     public GameObject nameBox;
     public Text nameText;
     public BattleSystem BattleSystem;
+    public MovementSystem moveSystem;
     public bool selectionEnemy;
     public bool selectionPlayer;
     public bool skillAll;
-    public int curSelectEnemy;
-    public int curSelectAlly;
+    public int curSelectPosX;
+    public int curSelectPosY;
+    public int curSelectIndex;
     public int curActionCode;
     public int curSkillNum;
     public Unit curSelectedUnit;
     public List<Unit> AllyUnitList;
     public List<Unit> EnemyUnitList;
+    [Header("Player Grid Transforms")]
+    public List<Transform> PlayerTransformList;
+    public List<Transform> EnemyTransformList;
+    public Transform[ , ] PlayerTransformArray = new Transform[3,3];
+    public Transform[ , ] EnemyTransformArray = new Transform[3,3];
     void Start()
     {
         AllyUnitList = BattleSystem.AllyUnitList;
@@ -31,6 +38,13 @@ public class SelectionSystem : MonoBehaviour
         GameObject selector = Instantiate(cursorPrefab);
         selectCursor = selector;
         selectCursor.SetActive(false);
+    }
+    public void UpdateTransforms()
+    {
+        PlayerTransformList = moveSystem.PlayerTransformList;
+        EnemyTransformList = moveSystem.EnemyTransformList;
+        PlayerTransformArray = moveSystem.PlayerTransformArray;
+        EnemyTransformArray = moveSystem.EnemyTransformArray;
     }
     void Update()
     {
@@ -42,64 +56,128 @@ public class SelectionSystem : MonoBehaviour
         if(selectionEnemy)
         {
             nameBox.SetActive(true);
-            if(curSelectEnemy < 0 || curSelectEnemy >= EnemyUnitList.Count)
-            {
-                curSelectEnemy = 0;
-            }
             selectCursor.SetActive(true);
             if(Input.GetKeyDown(KeyCode.UpArrow))
-                curSelectEnemy = ((curSelectEnemy - 1) + EnemyUnitList.Count) % EnemyUnitList.Count;
+                curSelectPosY = (curSelectPosY + 2) % 3;
             if(Input.GetKeyDown(KeyCode.DownArrow))
-                curSelectEnemy = (curSelectEnemy + 1) % EnemyUnitList.Count;
+                curSelectPosY = (curSelectPosY + 1) % 3;
+            if(Input.GetKeyDown(KeyCode.LeftArrow)) 
+                curSelectPosX = (curSelectPosX + 2) % 3;
+            if(Input.GetKeyDown(KeyCode.RightArrow))
+                curSelectPosX = (curSelectPosX + 1) % 3;
             if(Input.GetKeyDown(KeyCode.X))
             {
                 selectionEnemy = false;
                 EventSystem.current.SetSelectedGameObject(BattleSystem.lastSelect);
             }
             if(Input.GetKeyDown(KeyCode.Return))
-                DoAction();
-            curSelectedUnit = EnemyUnitList[curSelectEnemy];
+            {
+                if(curActionCode == 0)
+                {
+                    if(UnitAtGridEnemy(EnemyTransformArray[curSelectPosX,curSelectPosY]))
+                    {
+                        DoAction();
+                    } else
+                    {
+                        nameText.text = "Nothing there to target.";
+                        return;
+                    }
+                } else if (curActionCode == 1)
+                {
+                    if(skillAll)
+                    {
+                        DoAction();
+                    } else
+                    {
+                        if(UnitAtGridEnemy(EnemyTransformArray[curSelectPosX,curSelectPosY]))
+                        {
+                            DoAction();
+                            Debug.Log("yeah");
+                        } else
+                        {
+                            nameText.text = "Nothing there to target.";
+                            return;
+                        }
+                    }
+                }
+            }
             if(skillAll)
             {
                 nameText.text = "All enemies";
             } else
             {
-                nameText.text = curSelectedUnit.unitName;
+                if(UnitAtGridEnemy(EnemyTransformArray[curSelectPosX,curSelectPosY]))
+                {
+                    curSelectIndex = curSelectPosX + curSelectPosY*3;
+                    curSelectedUnit = EnemyAtPoint();
+                    nameText.text = curSelectedUnit.unitName;
+                }
             }
-
-            selectCursor.transform.position = curSelectedUnit.transform.Find("CenterLocator").position;
+            selectCursor.transform.position = EnemyTransformArray[curSelectPosX,curSelectPosY].transform.position;
         } else if(selectionPlayer)
         {
             nameBox.SetActive(true);
-            if(curSelectAlly < 0 || curSelectAlly >= AllyUnitList.Count)
-            {
-                curSelectAlly = 0;
-            }
             selectCursor.SetActive(true);
             if(Input.GetKeyDown(KeyCode.UpArrow))
-                curSelectAlly = ((curSelectAlly - 1) + AllyUnitList.Count) % AllyUnitList.Count;
+                curSelectPosY = (curSelectPosY + 2) % 3;
             if(Input.GetKeyDown(KeyCode.DownArrow))
-                curSelectAlly = (curSelectAlly + 1) % AllyUnitList.Count;
+                curSelectPosY = (curSelectPosY + 1) % 3;
+            if(Input.GetKeyDown(KeyCode.LeftArrow)) 
+                curSelectPosX = (curSelectPosX + 2) % 3;
+            if(Input.GetKeyDown(KeyCode.RightArrow))
+                curSelectPosX = (curSelectPosX + 1) % 3;
             if(Input.GetKeyDown(KeyCode.X))
             {
                 selectionPlayer = false;
                 EventSystem.current.SetSelectedGameObject(BattleSystem.lastSelect);
-            }   
+            }
             if(Input.GetKeyDown(KeyCode.Return))
-                DoAction();
-            curSelectedUnit = AllyUnitList[curSelectAlly];
+            {
+                if(curActionCode == 0)
+                {
+                    if(UnitAtGridAlly(PlayerTransformArray[curSelectPosX,curSelectPosY]))
+                    {
+                        DoAction();
+                    } else
+                    {
+                        nameText.text = "Nothing there to target.";
+                        return;
+                    }
+                } else if (curActionCode == 1)
+                {
+                    if(skillAll)
+                    {
+                        DoAction();
+                    } else
+                    {
+                        if(UnitAtGridAlly(PlayerTransformArray[curSelectPosX,curSelectPosY]))
+                        {
+                            DoAction();
+                        } else
+                        {
+                            nameText.text = "Nothing there to target.";
+                            return;
+                        }
+                    }
+                }
+            }
             if(skillAll)
             {
                 nameText.text = "All allies";
             } else
             {
-                nameText.text = curSelectedUnit.unitName;
+                if(UnitAtGridAlly(PlayerTransformArray[curSelectPosX,curSelectPosY]))
+                {
+                    curSelectIndex = curSelectPosX + curSelectPosY*3;
+                    curSelectedUnit = AllyAtPoint();
+                    nameText.text = curSelectedUnit.unitName;
+                }
             }
-            selectCursor.transform.position = curSelectedUnit.transform.Find("CenterLocator").position;
+        selectCursor.transform.position = PlayerTransformArray[curSelectPosX,curSelectPosY].transform.position;
         } else
         {
-            selectCursor.SetActive(false);
             nameBox.SetActive(false);
+            selectCursor.SetActive(false);
         }
     }
     public IEnumerator SelectorEnemy(int actionCode, int skillNum)
@@ -115,6 +193,7 @@ public class SelectionSystem : MonoBehaviour
         {
             skillAll = false;
         }
+        nameText.text = "Select a target.";
     }
     public void DoAction()
     {
@@ -155,5 +234,50 @@ public class SelectionSystem : MonoBehaviour
         {
             skillAll = false;
         }
+        nameText.text = "Select a target.";
+    }
+    public bool UnitAtGridAlly(Transform pos)
+    {
+        foreach(Unit ally in AllyUnitList)
+        {
+            if(PlayerTransformList[ally.gridPos] == pos)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    public bool UnitAtGridEnemy(Transform pos)
+    {
+        foreach(Unit enemy in EnemyUnitList)
+        {
+            if(EnemyTransformList[enemy.gridPos] == pos)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    public Unit AllyAtPoint()
+    {
+        foreach(Unit ally in AllyUnitList)
+        {
+            if(ally.gridPos == curSelectIndex)
+            {
+                return ally;
+            }
+        }
+        return null;
+    }
+    public Unit EnemyAtPoint()
+    {
+        foreach(Unit enemy in EnemyUnitList)
+        {
+            if(enemy.gridPos == curSelectIndex)
+            {
+                return enemy;
+            }
+        }
+        return null;
     }
 }

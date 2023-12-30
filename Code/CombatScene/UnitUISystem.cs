@@ -48,23 +48,18 @@ public class UnitUISystem : MonoBehaviour
         {
             case "Zach":
                 dialogueBox.GetComponent<Image>().color = new Color32(255,255,255,255);
-                Debug.Log("Set Zach");
                 break;
             case "Jack":
                 dialogueBox.GetComponent<Image>().color = new Color32(156,190,255,255);
-                Debug.Log("Set Jack");
                 break;
             case "Deri":
                 dialogueBox.GetComponent<Image>().color = new Color32(157,130,227,255);
-                Debug.Log("Set Deri");
                 break;
             case "Ethan":
                 dialogueBox.GetComponent<Image>().color = new Color32(110,155,234,255);
-                Debug.Log("Set Ethan");
                 break;
             case "Natasha":
                 dialogueBox.GetComponent<Image>().color = new Color32(255,158,121,255);
-                Debug.Log("Set Natasha");
                 break;
         }
     }
