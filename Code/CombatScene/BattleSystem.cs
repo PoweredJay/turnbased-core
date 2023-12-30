@@ -83,6 +83,21 @@ public class BattleSystem : MonoBehaviour
 
     void Update()
     {
+<<<<<<< Updated upstream
+=======
+        if (!MenuSystem.musicOn)
+        {
+            battleMusic.volume = 0;
+        } else
+        {
+            battleMusic.volume = MenuSystem.volume;
+        }
+        bool somethingHappening;
+        if(state == BattleState.START || state == BattleState.ENEMYTURN || state == BattleState.TURNGO || selectSystem.selectionEnemy == true || selectSystem.selectionPlayer == true || moveSystem.moveActive == true)
+            somethingHappening = true;
+        else
+            somethingHappening = false;
+>>>>>>> Stashed changes
         Cursor.visible = false;
         if (EventSystem.current.currentSelectedGameObject == null)
         {
