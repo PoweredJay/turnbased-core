@@ -18,6 +18,7 @@ public class MovementSystem : MonoBehaviour
     public GameObject enemyTransformSet;
     public GameObject HUDTransformSet;
     public BattleSystem BattleSystem;
+    public SelectionSystem selectSystem;
     [Header("Unit Management")]
     public bool moveActive;
     public int curSelectPosX;
@@ -30,6 +31,7 @@ public class MovementSystem : MonoBehaviour
     public List<Transform> EnemyTransformList;
     public List<Transform> HUDTransformList;
     public Transform[ , ] PlayerTransformArray = new Transform[3,3];
+    public Transform[ , ] EnemyTransformArray = new Transform[3,3];
     /*
         Due to the way the transform lists are populated, this is how the transform positions in the 3x3 grid
         correspond to the indices in both of the transform lists.
@@ -60,7 +62,8 @@ public class MovementSystem : MonoBehaviour
         {
             HUDTransformList.Add(child);
         }
-        //For the 2D array
+
+        //For the 2D arrays
         for(int i = 0; i < PlayerTransformArray.GetLength(0); i++)
         {
             for(int j = 0; j < PlayerTransformArray.GetLength(1); j++)
@@ -68,7 +71,15 @@ public class MovementSystem : MonoBehaviour
                 PlayerTransformArray[j,i] = playerTransformSet.transform.GetChild(i*PlayerTransformArray.GetLength(0)+j);
             }
         }
+        for(int i = 0; i < EnemyTransformArray.GetLength(0); i++)
+        {
+            for(int j = 0; j < EnemyTransformArray.GetLength(1); j++)
+            {
+                EnemyTransformArray[j,i] = enemyTransformSet.transform.GetChild(i*EnemyTransformArray.GetLength(0)+j);
+            }
+        }
         SetupBattlePos();
+        selectSystem.UpdateTransforms();
     }
     public void SetupBattlePos()
     {
@@ -111,19 +122,14 @@ public class MovementSystem : MonoBehaviour
             if(Input.GetKeyDown(KeyCode.Return))
             {
                 int pos = curSelectPosX + curSelectPosY*3;
-                foreach(Unit friend in AllyUnitList)
+                if(UnitAtGridAlly(PlayerTransformArray[curSelectPosX,curSelectPosY]))
                 {
-                    if(friend.gridPos == pos)
-                    {
-                        nameText.text = "Can't move there!";
-                        return;
-                    }
+                    nameText.text = "Can't move there!";
+                    return;
                 }
                 DoMove(curSelectedUnit);
                 moveActive = false;
             }
-            // if(curSelectPos < 0 || curSelectPos >= AllyUnitList.Count())
-            //     curSelectPos = 0;
             moveCursor.transform.position = PlayerTransformArray[curSelectPosX,curSelectPosY].transform.position;
         } else
         {
@@ -137,6 +143,28 @@ public class MovementSystem : MonoBehaviour
         nameText.text = "Move to...";
         moveActive = true;
         curSelectedUnit = unit;
+    }
+    public bool UnitAtGridAlly(Transform pos)
+    {
+        foreach(Unit ally in AllyUnitList)
+        {
+            if(PlayerTransformList[ally.gridPos] == pos)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    public bool UnitAtGridEnemy(Transform pos)
+    {
+        foreach(Unit enemy in EnemyUnitList)
+        {
+            if(EnemyTransformList[enemy.gridPos] == pos)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     public void DoMove(Unit unit)
     {
